@@ -53,6 +53,7 @@ const shapes = {
     ]),
   sphere: new defs.Subdivision_Sphere(8),
   triangle: new defs.Cone_Tip(10, 10),
+  torus: new defs.Torus(16, 16),
 };
 
 const phong_material = new Material(new defs.Phong_Shader());
@@ -108,6 +109,20 @@ export class Player extends GameObject {
     );
   }
 }
+export class Ring extends GameObject {
+  constructor(baseTransform) {
+    super(baseTransform);
+  }
+  draw(context, program_state, model_transform) {
+    shapes.torus.draw(context, program_state, model_transform.times(this.baseTransform), phong_material.override({
+      ambient: 0.4,
+      diffusivity: 0.6,
+      color: hex_color("#FF0000"),
+    }))
+  }
+
+}
+
 
 export class Rock extends GameObject {
   constructor(baseTransform) {

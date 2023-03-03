@@ -1,5 +1,5 @@
 import { defs, tiny } from "./examples/common.js";
-import { Ground, Player } from "./gameObject.js";
+import { Ground, Player, Ring } from "./gameObject.js";
 
 const {
   Vector,
@@ -35,7 +35,9 @@ export class Game extends Scene {
     this.player = new Player(Mat4.translation(...this.playerPosition));
     this.followCamera = true;
 
-    this.objects = [new Ground(Mat4.identity()), this.player];
+    this.objects = [new Ground(Mat4.identity()), this.player, new Ring(Mat4.translation(0, 0, 50).times(Mat4.scale(15, 15, 15))),
+    new Ring(Mat4.scale(15, 15, 15).times(Mat4.translation(1, -15, 30))),
+    ];
 
     // donut: new defs.Torus(15, 15, [[0, 2], [0, 1]]),
     // cone: new defs.Closed_Cone(4, 10, [[0, 2], [0, 1]]),
