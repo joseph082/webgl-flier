@@ -27,6 +27,10 @@ export class GameObject {
     return this.baseTransform;
   }
 
+  setBaseTransform(transform) {
+    this.baseTransform = transform;
+  }
+
   update(program_state) {
     for (let child of this.children) {
       child.update(program_state);
@@ -105,20 +109,37 @@ export class Player extends GameObject {
   }
 }
 
+export class Rock extends GameObject {
+  constructor(baseTransform) {
+    super(baseTransform);
+    this.randomOffsetX = Math.random() * 205;
+    this.randomScaling = Math.random() * 1.5 + 0.5;
+  }
+}
+
 export class Tree extends GameObject {
   constructor(baseTransform) {
     super(baseTransform);
+    this.rockRandomOffsetX = Math.random() * 205;
+    this.rockRandomScaling = Math.random() * 1.5 + 0.5;
   }
-  //ro
   draw(context, program_state, model_transform) {
+    // rocks
     shapes.trapezoidalPrism.draw(
       context,
       program_state,
       model_transform
-        .times(Mat4.translation(5, -1, 5))
+        .times(Mat4.translation(0 + this.rockRandomOffsetX, -1.5, 5.5))
         .times(this.getBaseTransform())
         .times(invertedGroundRotation)
-        .times(Mat4.scale(5, 3, 5.5)),
+        .times(Mat4.scale(5, 3, 5.5))
+        .times(
+          Mat4.scale(
+            this.rockRandomScaling,
+            this.rockRandomScaling,
+            this.rockRandomScaling
+          )
+        ),
       phong_material.override({
         ambient: 0.4,
         diffusivity: 0.6,
