@@ -2,6 +2,7 @@ import { defs, tiny } from "./examples/common.js";
 import {
   Color_Phong_Shader,
   Buffered_Texture,
+  Depth_Texture_Shader_2D,
   LIGHT_DEPTH_TEX_SIZE,
 } from "./examples/shadow-demo-shader.js";
 import { Ground, Player, Ring } from "./gameObject.js";
@@ -13,6 +14,7 @@ const {
   vec3,
   vec4,
   color,
+  Square,
   hex_color,
   Shader,
   Matrix,
@@ -33,9 +35,10 @@ export class Game extends Scene {
       triangle: new defs.Triangle(),
       rect: new defs.Square(),
       torus: new defs.Torus(15, 15),
+      square_2d: new defs.Square(),
     };
 
-    this.playerPosition = vec3(0, 20, 0);
+    this.playerPosition = vec3(0, 20, 5);
     this.playerVelocity = vec3(0, -5, 10);
     this.player = new Player(Mat4.translation(...this.playerPosition));
     this.followCamera = true;
@@ -71,6 +74,14 @@ export class Game extends Scene {
       vec3(0, 20, 0),
       vec3(0, 1, 0)
     );
+
+    this.depth_tex = new Material(new Depth_Texture_Shader_2D(), {
+      color: color(0, 0, 0.0, 1),
+      ambient: 1,
+      diffusivity: 0,
+      specularity: 0,
+      texture: null,
+    });
   }
 
   make_control_panel() {
@@ -158,17 +169,18 @@ export class Game extends Scene {
   }
 
   render_scene(context, program_state, shadow_pass) {
-    // TODO: Lighting (Requirement 2)
-    const light_position = vec4(0, 10, 0, 1);
-    // The parameters of the Light are: position, color, size
-    program_state.lights = [new Light(light_position, vec4(1, 1, 1, 1), 100)];
-
     const material_override = shadow_pass ? null : this.pure;
 
     program_state.draw_shadow = shadow_pass;
 
     for (let object of this.objects) {
-      object.draw(context, program_state, Mat4.identity(), material_override);
+      object.draw(
+        context,
+        program_state,
+        Mat4.identity(),
+        material_override,
+        shadow_pass ? this.light_depth_texture : null
+      );
     }
   }
 
@@ -204,6 +216,69 @@ export class Game extends Scene {
     const playerMatrix = Mat4.translation(...this.playerPosition);
     this.player.setBaseTransform(playerMatrix);
 
+    for (let object of this.objects) {
+      object.update(program_state);
+    }
+
+    // TODO: Lighting (Requirement 2)
+    this.light_position = vec4(
+      this.playerPosition[0],
+      this.playerPosition[1] + 10,
+      this.playerPosition[2],
+      // 0,
+      // 10,
+      // 0,
+      1
+    );
+    // The parameters of the Light are: position, color, size
+    program_state.lights = [
+      new Light(this.light_position, vec4(1, 0, 0, 1), 10000000000000),
+    ];
+
+    this.light_view_target = vec4(
+      this.playerPosition[0],
+      this.playerPosition[1] - 1000,
+      this.playerPosition[2],
+      1
+    );
+    this.light_field_of_view = (130 * Math.PI) / 180; // 130 degree
+
+    const light_view_mat = Mat4.look_at(
+      vec3(
+        this.light_position[0],
+        this.light_position[1],
+        this.light_position[2]
+      ),
+      vec3(
+        this.light_view_target[0],
+        this.light_view_target[1],
+        this.light_view_target[2]
+      ),
+      vec3(1, 0, 0) // assume the light to target will have a up dir of +y, maybe need to change according to your case
+    );
+    const light_proj_mat = Mat4.perspective(
+      this.light_field_of_view,
+      1,
+      5,
+      500000
+    );
+    // Bind the Depth Texture Buffer
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.lightDepthFramebuffer);
+    gl.viewport(0, 0, this.lightDepthTextureSize, this.lightDepthTextureSize);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // Prepare uniforms
+    program_state.light_view_mat = light_view_mat;
+    program_state.light_proj_mat = light_proj_mat;
+    program_state.light_tex_mat = light_proj_mat;
+    program_state.view_mat = light_view_mat;
+    program_state.projection_transform = light_proj_mat;
+    this.render_scene(context, program_state, false);
+
+    // Step 2: unbind, draw to the canvas
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
     if (this.followCamera) {
       // const dv = this.playerVelocity.copy();
       // dv.scale_by(-6);
@@ -213,7 +288,7 @@ export class Game extends Scene {
         this.playerPosition,
         // vec3(0, 20, -20),
         // vec3(0, 0, 20),
-        vec3(0, 0, 1)
+        vec3(0, 1, 0)
       );
       program_state.set_camera(desired);
     }
@@ -225,18 +300,18 @@ export class Game extends Scene {
       1000
     );
 
-    for (let object of this.objects) {
-      object.update(program_state);
-    }
+    program_state.view_mat = program_state.camera_inverse;
+    this.render_scene(context, program_state, true);
 
-    // TODO: Lighting (Requirement 2)
-    const light_position = vec4(0, 10, 0, 1);
-    // The parameters of the Light are: position, color, size
-    program_state.lights = [new Light(light_position, vec4(1, 1, 1, 1), 100)];
-
-    for (let object of this.objects) {
-      object.draw(context, program_state, Mat4.identity());
-    }
+    // Step 3: display the textures
+    // this.shapes.square_2d.draw(
+    //   context,
+    //   program_state,
+    //   Mat4.translation(-0.99, 0.08, 0).times(
+    //     Mat4.scale(0.5, (0.5 * gl.canvas.width) / gl.canvas.height, 1)
+    //   ),
+    //   this.depth_tex.override({ texture: this.lightDepthTexture })
+    // );
 
     // x-axis is blue
     // this.shapes.rect.draw(
