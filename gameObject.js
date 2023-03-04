@@ -14,6 +14,9 @@ const {
   Light,
   Shape,
   Material,
+
+  Texture,
+  Textured_Phong,
   Scene,
 } = tiny;
 
@@ -54,9 +57,21 @@ const shapes = {
   sphere: new defs.Subdivision_Sphere(8),
   triangle: new defs.Cone_Tip(10, 10),
   torus: new defs.Torus(16, 16),
+  cube: new defs.Cube(),
 };
 
 const phong_material = new Material(new defs.Phong_Shader());
+const rockTexture = new Material(new defs.Textured_Phong(), {
+  // color: hex_color("#7F8386"), // <-- changed base color to black
+  ambient: 1.0, // <-- changed ambient to 1
+  diffusivity: 0, // <-- changed ambient to 1
+  texture: new Texture("assets/rock_texture.jpg"),
+});
+const snowTexture = new Material(new defs.Textured_Phong(), {
+  ambient: 1.0, // <-- changed ambient to 1
+  diffusivity: 0, // <-- changed ambient to 1
+  texture: new Texture("assets/Snow004_1K_Color.jpg"),
+});
 
 const groundRotation = Mat4.rotation((Math.PI * 2) / 3, 1, 0, 0);
 const invertedGroundRotation = Mat4.inverse(groundRotation);
@@ -64,6 +79,8 @@ const invertedGroundRotation = Mat4.inverse(groundRotation);
 export class Player extends GameObject {
   constructor(baseTransform) {
     super(baseTransform);
+
+    this.wingsuitOrange = hex_color("#DD571C");
   }
 
   draw(context, program_state, model_transform) {
@@ -76,7 +93,7 @@ export class Player extends GameObject {
       phong_material.override({
         ambient: 0.9,
         diffusivity: 0.0,
-        color: hex_color("#DD571C"),
+        color: this.wingsuitOrange,
       })
     );
 
@@ -90,7 +107,7 @@ export class Player extends GameObject {
       phong_material.override({
         ambient: 0.9,
         diffusivity: 0.0,
-        color: hex_color("#DD571C"),
+        color: this.wingsuitOrange,
       })
     );
 
@@ -104,7 +121,7 @@ export class Player extends GameObject {
       phong_material.override({
         ambient: 0.9,
         diffusivity: 0.0,
-        color: hex_color("#DD571C"),
+        color: this.wingsuitOrange,
       })
     );
   }
@@ -114,21 +131,62 @@ export class Ring extends GameObject {
     super(baseTransform);
   }
   draw(context, program_state, model_transform) {
-    shapes.torus.draw(context, program_state, model_transform.times(this.baseTransform), phong_material.override({
-      ambient: 0.4,
-      diffusivity: 0.6,
-      color: hex_color("#FF0000"),
-    }))
+    shapes.torus.draw(
+      context,
+      program_state,
+      model_transform.times(this.baseTransform),
+      phong_material.override({
+        ambient: 0.4,
+        diffusivity: 0.6,
+        color: hex_color("#FF0000"),
+      })
+    );
   }
-
 }
-
 
 export class Rock extends GameObject {
   constructor(baseTransform) {
     super(baseTransform);
     this.randomOffsetX = Math.random() * 205;
     this.randomScaling = Math.random() * 1.5 + 0.5;
+  }
+  draw(context, program_state, model_transform) {
+    // rocks
+    shapes.trapezoidalPrism.draw(
+      context,
+      program_state,
+      model_transform
+        .times(Mat4.translation(0 + this.randomOffsetX, -1.5, 5.5))
+        .times(this.getBaseTransform())
+        .times(invertedGroundRotation)
+        .times(Mat4.scale(5, 3, 5.5))
+        .times(
+          Mat4.scale(this.randomScaling, this.randomScaling, this.randomScaling)
+        ),
+      rockTexture.override({
+        ambient: 0.4,
+        diffusivity: 0.0,
+        //color: hex_color("#7F8386"),
+      })
+    );
+
+    // shapes.cube.draw(
+    //   context,
+    //   program_state,
+    //   model_transform
+    //     .times(Mat4.translation(0 + this.randomOffsetX, -1.5, 5.5))
+    //     .times(this.getBaseTransform())
+    //     .times(invertedGroundRotation)
+    //     .times(Mat4.scale(5, 3, 5.5))
+    //     .times(
+    //       Mat4.scale(this.randomScaling, this.randomScaling, this.randomScaling)
+    //     ),
+    //   rockTexture.override({
+    //     ambient: 0.4,
+    //     diffusivity: 0.0,
+    //     //color: hex_color("#7F8386"),
+    //   })
+    // );
   }
 }
 
@@ -139,29 +197,6 @@ export class Tree extends GameObject {
     this.rockRandomScaling = Math.random() * 1.5 + 0.5;
   }
   draw(context, program_state, model_transform) {
-    // rocks
-    shapes.trapezoidalPrism.draw(
-      context,
-      program_state,
-      model_transform
-        .times(Mat4.translation(0 + this.rockRandomOffsetX, -1.5, 5.5))
-        .times(this.getBaseTransform())
-        .times(invertedGroundRotation)
-        .times(Mat4.scale(5, 3, 5.5))
-        .times(
-          Mat4.scale(
-            this.rockRandomScaling,
-            this.rockRandomScaling,
-            this.rockRandomScaling
-          )
-        ),
-      phong_material.override({
-        ambient: 0.4,
-        diffusivity: 0.6,
-        color: hex_color("#7F8386"),
-      })
-    );
-
     const TREE_HEIGHT = 10;
     shapes.trapezoidalPrism.draw(
       context,
@@ -207,6 +242,12 @@ export class Ground extends GameObject {
       const z = -5;
       this.children.push(new Tree(Mat4.translation(x, y, z)));
     }
+    for (let i = 0; i < 25; i++) {
+      const x = Math.random() * 400 - 200;
+      const y = Math.random() * 400;
+      const z = -5;
+      this.children.push(new Rock(Mat4.translation(x, y, z)));
+    }
   }
 
   draw(context, program_state, model_transform) {
@@ -216,10 +257,8 @@ export class Ground extends GameObject {
       model_transform
         .times(this.getBaseTransform())
         .times(groundRotation.times(Mat4.scale(1000, 1000, 1))),
-      phong_material.override({
+      snowTexture.override({
         ambient: 0.85,
-        diffusivity: 0.6,
-        color: hex_color("#F4F5E2"),
       })
     );
 
