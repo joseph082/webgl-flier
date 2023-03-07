@@ -118,12 +118,12 @@ export class Player extends GameObject {
         .times(this.getBaseTransform())
         .times(Mat4.scale(1.5, 1.5, 1.5)),
       material_override ??
-        phong_material.override({
-          ambient: 0.9,
-          diffusivity: 0.0,
-          color: this.wingsuitOrange,
-          light_depth_buffer,
-        })
+      phong_material.override({
+        ambient: 0.9,
+        diffusivity: 0.0,
+        color: this.wingsuitOrange,
+        light_depth_buffer,
+      })
     );
 
     shapes.triangle.draw(
@@ -134,12 +134,12 @@ export class Player extends GameObject {
         .times(Mat4.rotation(Math.PI / 2, 0, 1, 0))
         .times(Mat4.scale(2, 1, 5)),
       material_override ??
-        phong_material.override({
-          ambient: 0.9,
-          diffusivity: 0.0,
-          color: this.wingsuitOrange,
-          light_depth_buffer,
-        })
+      phong_material.override({
+        ambient: 0.9,
+        diffusivity: 0.0,
+        color: this.wingsuitOrange,
+        light_depth_buffer,
+      })
     );
 
     shapes.triangle.draw(
@@ -150,12 +150,29 @@ export class Player extends GameObject {
         .times(Mat4.rotation(-Math.PI / 2, 0, 1, 0))
         .times(Mat4.scale(2, 1, 5)),
       material_override ??
-        phong_material.override({
-          ambient: 0.9,
-          diffusivity: 0.0,
-          color: this.wingsuitOrange,
-          light_depth_buffer,
-        })
+      phong_material.override({
+        ambient: 0.9,
+        diffusivity: 0.0,
+        color: this.wingsuitOrange,
+        light_depth_buffer,
+      })
+    );
+    // bottom triangle
+    shapes.triangle.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.getBaseTransform())
+        .times(Mat4.translation(0, -2, 0))
+        .times(Mat4.rotation(0, 0, 1, 0))
+        .times(Mat4.scale(5, 2, 6)),
+      material_override ??
+      phong_material.override({
+        ambient: 0.9,
+        diffusivity: 0.0,
+        color: this.wingsuitOrange,
+        light_depth_buffer,
+      })
     );
   }
 }
@@ -175,12 +192,12 @@ export class Ring extends GameObject {
       program_state,
       model_transform.times(this.baseTransform),
       material_override ??
-        phong_material.override({
-          ambient: 0.4,
-          diffusivity: 0.6,
-          color: hex_color("#FF0000"),
-          light_depth_buffer,
-        })
+      phong_material.override({
+        ambient: 0.4,
+        diffusivity: 0.6,
+        color: hex_color("#FF0000"),
+        light_depth_buffer,
+      })
     );
   }
 }
@@ -211,10 +228,10 @@ export class Rock extends GameObject {
           Mat4.scale(this.randomScaling, this.randomScaling, this.randomScaling)
         ),
       material_override ??
-        rockTexture.override({
-          light_depth_buffer,
-          //color: hex_color("#7F8386"),
-        })
+      rockTexture.override({
+        light_depth_buffer,
+        //color: hex_color("#7F8386"),
+      })
     );
 
     // shapes.cube.draw(
@@ -259,12 +276,12 @@ export class Tree extends GameObject {
         .times(invertedGroundRotation)
         .times(Mat4.scale(1, TREE_HEIGHT, 1)),
       material_override ??
-        phong_material.override({
-          ambient: 0.4,
-          diffusivity: 0.6,
-          color: hex_color("#964B00"),
-          light_depth_buffer,
-        })
+      phong_material.override({
+        ambient: 0.4,
+        diffusivity: 0.6,
+        color: hex_color("#964B00"),
+        light_depth_buffer,
+      })
     );
 
     // position of this might be centered? so needs to scale more?
@@ -279,12 +296,12 @@ export class Tree extends GameObject {
           Mat4.translation(0, 10, 0).times(Mat4.scale(1.5, TREE_HEIGHT, 1.5))
         ),
       material_override ??
-        phong_material.override({
-          ambient: 0.4,
-          diffusivity: 0.6,
-          color: hex_color("#2C493F"),
-          light_depth_buffer,
-        })
+      phong_material.override({
+        ambient: 0.4,
+        diffusivity: 0.6,
+        color: hex_color("#2C493F"),
+        light_depth_buffer,
+      })
     );
   }
 }
