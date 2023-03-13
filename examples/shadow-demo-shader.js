@@ -227,7 +227,8 @@ export class Shadow_Textured_Phong_Shader extends defs.Phong_Shader {
                         float shadowness = PCF_shadow(light_tex_coord.xy, projected_depth);
                         
                         if (inRange && shadowness > 0.3) {
-                            diffuse *= 0.2 + 0.8 * (1.0 - shadowness);
+                            // diffuse *= 0.2 + 0.8 * (1.0 - shadowness);
+                            diffuse *= 0.0;
                             specular *= 1.0 - shadowness;
                         }
                     }

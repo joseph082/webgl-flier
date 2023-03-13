@@ -228,8 +228,8 @@ export class Game extends Scene {
     // TODO: Lighting (Requirement 2)
     this.light_position = vec4(
       this.playerPosition[0],
-      this.playerPosition[1] + 100,
-      this.playerPosition[2] ,
+      this.playerPosition[1] + 20,
+      this.playerPosition[2] - 40,
       // 0,
       // 20,
       // 0,
