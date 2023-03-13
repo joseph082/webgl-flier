@@ -46,7 +46,7 @@ export class GameObject {
     program_state,
     model_transform,
     material_override,
-    light_depth_buffer
+    light_depth_texture
   ) {
     for (let child of this.children) {
       child.draw(
@@ -54,7 +54,7 @@ export class GameObject {
         program_state,
         model_transform,
         material_override,
-        light_depth_buffer
+        light_depth_texture
       );
     }
   }
@@ -109,7 +109,7 @@ export class Player extends GameObject {
     program_state,
     model_transform,
     material_override,
-    light_depth_buffer
+    light_depth_texture
   ) {
     shapes.sphere.draw(
       context,
@@ -122,7 +122,7 @@ export class Player extends GameObject {
         ambient: 0.9,
         diffusivity: 0.0,
         color: this.wingsuitOrange,
-        light_depth_buffer,
+        light_depth_texture,
       })
     );
 
@@ -138,7 +138,7 @@ export class Player extends GameObject {
         ambient: 0.9,
         diffusivity: 0.0,
         color: this.wingsuitOrange,
-        light_depth_buffer,
+        light_depth_texture,
       })
     );
 
@@ -154,7 +154,7 @@ export class Player extends GameObject {
         ambient: 0.9,
         diffusivity: 0.0,
         color: this.wingsuitOrange,
-        light_depth_buffer,
+        light_depth_texture,
       })
     );
     // bottom triangle
@@ -171,7 +171,7 @@ export class Player extends GameObject {
         ambient: 0.9,
         diffusivity: 0.0,
         color: this.wingsuitOrange,
-        light_depth_buffer,
+        light_depth_texture,
       })
     );
   }
@@ -185,7 +185,7 @@ export class Ring extends GameObject {
     program_state,
     model_transform,
     material_override,
-    light_depth_buffer
+    light_depth_texture
   ) {
     shapes.torus.draw(
       context,
@@ -196,7 +196,7 @@ export class Ring extends GameObject {
         ambient: 0.4,
         diffusivity: 0.6,
         color: hex_color("#FF0000"),
-        light_depth_buffer,
+        light_depth_texture,
       })
     );
   }
@@ -213,7 +213,7 @@ export class Rock extends GameObject {
     program_state,
     model_transform,
     material_override,
-    light_depth_buffer
+    light_depth_texture
   ) {
     // rocks
     shapes.trapezoidalPrism.draw(
@@ -229,7 +229,7 @@ export class Rock extends GameObject {
         ),
       material_override ??
       rockTexture.override({
-        light_depth_buffer,
+        light_depth_texture,
         //color: hex_color("#7F8386"),
       })
     );
@@ -265,7 +265,7 @@ export class Tree extends GameObject {
     program_state,
     model_transform,
     material_override,
-    light_depth_buffer
+    light_depth_texture
   ) {
     const TREE_HEIGHT = 10;
     shapes.trapezoidalPrism.draw(
@@ -280,7 +280,7 @@ export class Tree extends GameObject {
         ambient: 0.4,
         diffusivity: 0.6,
         color: hex_color("#964B00"),
-        light_depth_buffer,
+        light_depth_texture,
       })
     );
 
@@ -300,7 +300,7 @@ export class Tree extends GameObject {
         ambient: 0.4,
         diffusivity: 0.6,
         color: hex_color("#2C493F"),
-        light_depth_buffer,
+        light_depth_texture,
       })
     );
   }
@@ -329,7 +329,7 @@ export class Ground extends GameObject {
     program_state,
     model_transform,
     material_override,
-    light_depth_buffer
+    light_depth_texture
   ) {
     shapes.square.draw(
       context,
@@ -337,7 +337,7 @@ export class Ground extends GameObject {
       model_transform
         .times(this.getBaseTransform())
         .times(groundRotation.times(Mat4.scale(1000, 1000, 1))),
-      material_override ?? snowTexture.override({ light_depth_buffer })
+      material_override ?? snowTexture.override({ light_depth_texture })
     );
 
     for (let tree of this.children) {
@@ -346,7 +346,7 @@ export class Ground extends GameObject {
         program_state,
         model_transform.times(this.getBaseTransform()).times(groundRotation),
         material_override,
-        light_depth_buffer
+        light_depth_texture
       );
     }
   }

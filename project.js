@@ -38,19 +38,21 @@ export class Game extends Scene {
       square_2d: new defs.Square(),
     };
 
-    this.playerPosition = vec3(0, 20, 5);
+    this.playerPosition = vec3(0, 22, 5);
     this.playerVelocity = vec3(0, -5, 10);
     this.player = new Player(Mat4.translation(...this.playerPosition));
     this.followCamera = true;
 
+    this.ground = new Ground(Mat4.identity());
     this.objects = [
-      new Ground(Mat4.identity()),
+      this.ground,
       this.player,
       new Ring(Mat4.translation(0, 0, 50).times(Mat4.scale(15, 15, 15))),
       new Ring(Mat4.scale(15, 15, 15).times(Mat4.translation(1, -15, 30))),
     ];
 
     this.pure = new Material(new Color_Phong_Shader(), {});
+    this.shader = new Material(new Color_Phong_Shader(), { ambient: 1.0 });
     this.init_ok = false;
 
     // donut: new defs.Torus(15, 15, [[0, 2], [0, 1]]),
@@ -174,6 +176,9 @@ export class Game extends Scene {
     program_state.draw_shadow = shadow_pass;
 
     for (let object of this.objects) {
+      // if (object === this.ground && !shadow_pass) {
+        // continue;
+      // }
       object.draw(
         context,
         program_state,
@@ -223,19 +228,20 @@ export class Game extends Scene {
     // TODO: Lighting (Requirement 2)
     this.light_position = vec4(
       this.playerPosition[0],
-      this.playerPosition[1] + 10,
-      this.playerPosition[2],
+      this.playerPosition[1] + 100,
+      this.playerPosition[2] ,
       // 0,
-      // 10,
+      // 20,
       // 0,
       1
     );
     // The parameters of the Light are: position, color, size
     program_state.lights = [
-      new Light(this.light_position, vec4(1, 0, 0, 1), 10000000000000),
+      new Light(this.light_position, vec4(1, 1, 1, 1), 10000000000000),
     ];
 
     this.light_view_target = vec4(
+      // 0,-50,50,
       this.playerPosition[0],
       this.playerPosition[1] - 1000,
       this.playerPosition[2],
@@ -252,7 +258,7 @@ export class Game extends Scene {
       vec3(
         this.light_view_target[0],
         this.light_view_target[1],
-        this.light_view_target[2]
+        this.light_view_target[2] - 10
       ),
       vec3(1, 0, 0) // assume the light to target will have a up dir of +y, maybe need to change according to your case
     );
@@ -260,7 +266,7 @@ export class Game extends Scene {
       this.light_field_of_view,
       1,
       5,
-      500000
+      500
     );
     // Bind the Depth Texture Buffer
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.lightDepthFramebuffer);
@@ -312,6 +318,8 @@ export class Game extends Scene {
     //   ),
     //   this.depth_tex.override({ texture: this.lightDepthTexture })
     // );
+
+    this.shapes.torus.draw(context, program_state, Mat4.translation(this.light_position[0], this.light_position[1], this.light_position[2]), this.shader.override({color: hex_color("#0000FF")}));
 
     // x-axis is blue
     // this.shapes.rect.draw(

@@ -4,7 +4,7 @@ const {vec3, vec4, vec, color, Matrix, Mat4, Light, Shape, Material, Shader, Tex
 const {Cube, Axis_Arrows, Textured_Phong, Phong_Shader, Basic_Shader, Subdivision_Sphere} = defs
 
 // The size of the light texture buffer
-export const LIGHT_DEPTH_TEX_SIZE = 2048;
+export const LIGHT_DEPTH_TEX_SIZE = 8192;
 
 export class Color_Phong_Shader extends defs.Phong_Shader {
         vertex_glsl_code() {
@@ -290,7 +290,7 @@ export class Shadow_Textured_Phong_Shader extends defs.Phong_Shader {
             }
             if (gpu_state.draw_shadow) {
                 context.uniform1i(gpu_addresses.draw_shadow, 1);
-                context.uniform1f(gpu_addresses.light_depth_bias, 0.003);
+                context.uniform1f(gpu_addresses.light_depth_bias, 0.0003);
                 context.uniform1f(gpu_addresses.light_texture_size, LIGHT_DEPTH_TEX_SIZE);
                 context.uniform1i(gpu_addresses.light_depth_texture, 1); // 1 for light-view depth texture}
                 if (material.light_depth_texture && material.light_depth_texture.ready) {
