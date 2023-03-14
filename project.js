@@ -25,6 +25,8 @@ const {
   Scene,
 } = tiny;
 
+const BANK_ANGLE = 0.015;
+
 export class Game extends Scene {
   constructor() {
     // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
@@ -38,8 +40,10 @@ export class Game extends Scene {
       square_2d: new defs.Square(),
     };
 
-    this.playerPosition = vec3(0, 22, 5);
-    this.playerVelocity = vec3(0, -5, 10);
+    this.playerPosition = vec3(0, 600, 5);
+    this.playerVelocity = vec3(0, -0.5, 1);
+    this.speed = 200;
+    this.playerAcceleration = vec3(0, 0, 0);
     this.player = new Player(Mat4.translation(...this.playerPosition));
     this.followCamera = true;
 
@@ -84,23 +88,113 @@ export class Game extends Scene {
       specularity: 0,
       texture: null,
     });
+
+    this.flatten_up_press = false;
+    this.dive_down_press = false;
+    this.bank_left_press = false;
+    this.bank_right_press = false;
+    this.lateral_left_press = false;
+    this.lateral_right_press = false;
+
+    this.lateral_value = 0;
+  }
+
+  left_vector() {
+    return vec3(0, 0, 0);
+  }
+
+  flatten_up() {
+    console.log(this.playerVelocity)
+    if (this.speed > 100)
+      this.speed--;
+    if (this.playerVelocity[1] < -0.2)
+      this.playerVelocity.add_by(vec3(0, 0.01, 0));
+    // let angleDif = Math.acos(Math.sqrt(this.playerVelocity[1]**2 + this.playerVelocity[2]**2));
+    // console.log(angleDif);
+    // // let clockwiseRotation = (0 < this.playerVelocity[0] && 0 < this.playerVelocity[2]) || (this.playerVelocity[0] < 0 || this.playerVelocity[2] < 0);
+    //
+    // // Rotate into YZ plane
+    // let newX = this.playerVelocity[0] * Math.cos(-angleDif) - this.playerVelocity[2] * Math.sin(-angleDif);
+    // let newY = this.playerVelocity[1];
+    // let newZ = this.playerVelocity[0] * Math.sin(-angleDif) + this.playerVelocity[2] * Math.cos(-angleDif);
+    //
+    // // Rotate along the Z axis
+    // // newY = newY * Math.cos(-0.01) - newZ * Math.sin(-0.05);
+    // // newZ = newY * Math.sin(-0.01) + newZ * Math.cos(-0.05);
+    //
+    // // Rotate back out of YZ plane
+    // newX = newX * Math.cos(angleDif) - newZ * Math.sin(angleDif);
+    // newZ = newX * Math.sin(angleDif) + newZ * Math.cos(angleDif);
+    //
+    // this.playerVelocity[0] = newX;
+    // this.playerVelocity[2] = newZ;
+    // = vec3(newX, newY, newZ);
+  }
+
+  dive_down() {
+    console.log(this.playerVelocity)
+
+    if (this.speed < 600)
+      this.speed+=5;
+    this.playerVelocity.add_by(vec3(0, -0.01, 0));
+    // let angleDif = Math.acos(Math.sqrt(this.playerVelocity[1]**2 + this.playerVelocity[2]**2));
+    // console.log(angleDif);    // let clockwiseRotation = (0 < this.playerVelocity[0] && 0 < this.playerVelocity[2]) || (this.playerVelocity[0] < 0 || this.playerVelocity[2] < 0);
+    //
+    // // Rotate into YZ plane
+    // let newX = this.playerVelocity[0] * Math.cos(-angleDif) - this.playerVelocity[2] * Math.sin(-angleDif);
+    // let newY = this.playerVelocity[1];
+    // let newZ = this.playerVelocity[0] * Math.sin(-angleDif) + this.playerVelocity[2] * Math.cos(-angleDif);
+    //
+    // // Rotate along the X axis
+    // // newY = newY * Math.cos(0.01) - newZ * Math.sin(0.05);
+    // // newZ = newY * Math.sin(0.01) + newZ * Math.cos(0.05);
+    //
+    // // Rotate back out of YZ plane
+    // newX = newX * Math.cos(angleDif) - newZ * Math.sin(angleDif);
+    // newZ = newX * Math.sin(angleDif) + newZ * Math.cos(angleDif);
+    // this.playerVelocity[0] = newX;
+    // this.playerVelocity[2] = newZ;
+    // // this.playerVelocity = vec3(newX, newY, newZ);
+  }
+
+  bank_left() {
+    let newX = this.playerVelocity[0] * Math.cos(-BANK_ANGLE) - this.playerVelocity[2] * Math.sin(-BANK_ANGLE);
+    let newZ = this.playerVelocity[0] * Math.sin(-BANK_ANGLE) + this.playerVelocity[2] * Math.cos(-BANK_ANGLE);
+    this.playerVelocity = vec3(newX, this.playerVelocity[1], newZ);
+  }
+
+  bank_right() {
+    let newX = this.playerVelocity[0] * Math.cos(BANK_ANGLE) - this.playerVelocity[2] * Math.sin(BANK_ANGLE);
+    let newZ = this.playerVelocity[0] * Math.sin(BANK_ANGLE) + this.playerVelocity[2] * Math.cos(BANK_ANGLE);
+    this.playerVelocity = vec3(newX, this.playerVelocity[1], newZ);
+  }
+
+  lateral_left() {
+    if (-20 < this.lateral_value)
+      this.lateral_value--;
+  }
+
+  lateral_right() {
+    if (this.lateral_value < 20)
+      this.lateral_value++;
   }
 
   make_control_panel() {
     // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
     this.key_triggered_button(
-      "Attach to wingsuit",
-      ["Control", "0"],
-      () => (this.followCamera = !this.followCamera)
+        "Attach to wingsuit",
+        ["Control", "0"],
+        () => (this.followCamera = !this.followCamera)
     );
     this.new_line();
-    this.key_triggered_button("Move Left", ["a"], () =>
-      this.playerVelocity.add_by(vec3(0.5, 0, 0))
-    );
+    this.key_triggered_button("Flatten", ["w"], () => this.flatten_up_press = true, "#6E6460", () => this.flatten_up_press = false);
+    this.key_triggered_button("Dive down", ["s"], () => this.dive_down_press = true, "#6E6460", () => this.dive_down_press = false);
     this.new_line();
-    this.key_triggered_button("Move Right", ["d"], () =>
-      this.playerVelocity.add_by(vec3(-0.5, 0, 0))
-    );
+    this.key_triggered_button("Bank Left", ["a"], () => this.bank_left_press = true, "#6E6460", () => this.bank_left_press = false);
+    this.key_triggered_button("Bank Right", ["d"], () => this.bank_right_press = true, "#6E6460", () => this.bank_right_press = false);
+    this.new_line();
+    this.key_triggered_button("Lateral Move Left", ["q"], () => this.lateral_left_press = true, "#6E6460", () => this.lateral_left_press = false);
+    this.key_triggered_button("Lateral Move Right", ["e"], () => this.lateral_right_press = true, "#6E6460", () => this.lateral_right_press = false);
   }
 
   // NOTE: this function is copied from examples/shadow-demo.js
@@ -190,6 +284,24 @@ export class Game extends Scene {
   }
 
   display(context, program_state) {
+
+    if (this.flatten_up_press)
+      this.flatten_up();
+    if (this.dive_down_press)
+      this.dive_down();
+    if (this.bank_left_press)
+      this.bank_left();
+    if (this.bank_right_press)
+      this.bank_right();
+    if (this.lateral_left_press)
+      this.lateral_left();
+    if (this.lateral_right_press)
+      this.lateral_right();
+    if (!this.lateral_right_press && !this.lateral_left_press && this.lateral_value != 0)
+      this.lateral_value -= (0 < this.lateral_value ? 1 : -1);
+
+    this.playerVelocity.normalize();
+
     const gl = context.context;
 
     if (!this.init_ok) {
@@ -214,11 +326,19 @@ export class Game extends Scene {
     }
 
     const dt = program_state.animation_delta_time / 1000;
-    const v = this.playerVelocity.copy();
+    const v = this.playerVelocity.times(this.speed);
+    // console.log(this.playerVelocity)
+    // console.log(this.playerPosition)
+
     v.scale_by(dt);
     this.playerPosition.add_by(v);
 
-    const playerMatrix = Mat4.translation(...this.playerPosition);
+    let lateralVec = this.playerVelocity.cross(vec(0, 1, 0));
+    this.playerPosition.add_by(lateralVec.times(this.lateral_value/10));
+
+    let rotAngle = vec3(0, 0, 1).cross(this.playerVelocity);
+
+    let playerMatrix = Mat4.identity().times(Mat4.translation(...this.playerPosition)).times(Mat4.rotation(this.lateral_value/60, ...this.playerVelocity)).times(Mat4.rotation(Math.asin(rotAngle.norm()), ...rotAngle));
     this.player.setBaseTransform(playerMatrix);
 
     for (let object of this.objects) {
@@ -290,7 +410,7 @@ export class Game extends Scene {
       // dv.scale_by(-6);
       const desired = Mat4.look_at(
         // vec3(0, 20, 0),
-        this.playerPosition.plus(vec3(0, 15, -25)),
+        this.playerPosition.minus(this.playerVelocity.times(20)).plus(vec3(0, 15, 0)),
         this.playerPosition,
         // vec3(0, 20, -20),
         // vec3(0, 0, 20),
@@ -319,7 +439,7 @@ export class Game extends Scene {
     //   this.depth_tex.override({ texture: this.lightDepthTexture })
     // );
 
-    this.shapes.torus.draw(context, program_state, Mat4.translation(this.light_position[0], this.light_position[1], this.light_position[2]), this.shader.override({color: hex_color("#0000FF")}));
+    // this.shapes.torus.draw(context, program_state, Mat4.translation(this.light_position[0], this.light_position[1], this.light_position[2]), this.shader.override({color: hex_color("#0000FF")}));
 
     // x-axis is blue
     // this.shapes.rect.draw(
