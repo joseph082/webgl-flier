@@ -111,12 +111,12 @@ export class Player extends GameObject {
     material_override,
     light_depth_texture
   ) {
-    shapes.sphere.draw(
+    shapes.cube.draw(
       context,
       program_state,
       model_transform
         .times(this.getBaseTransform())
-        .times(Mat4.scale(1.5, 1.5, 1.5)),
+        .times(Mat4.scale(1, 0.5, 2.5)),
       material_override ??
       phong_material.override({
         ambient: 0.9,
@@ -125,55 +125,69 @@ export class Player extends GameObject {
         light_depth_texture,
       })
     );
-
-    shapes.triangle.draw(
-      context,
-      program_state,
-      model_transform
-        .times(this.getBaseTransform())
-        .times(Mat4.rotation(Math.PI / 2, 0, 1, 0))
-        .times(Mat4.scale(2, 1, 5)),
-      material_override ??
-      phong_material.override({
-        ambient: 0.9,
-        diffusivity: 0.0,
-        color: this.wingsuitOrange,
-        light_depth_texture,
-      })
-    );
-
-    shapes.triangle.draw(
-      context,
-      program_state,
-      model_transform
-        .times(this.getBaseTransform())
-        .times(Mat4.rotation(-Math.PI / 2, 0, 1, 0))
-        .times(Mat4.scale(2, 1, 5)),
-      material_override ??
-      phong_material.override({
-        ambient: 0.9,
-        diffusivity: 0.0,
-        color: this.wingsuitOrange,
-        light_depth_texture,
-      })
-    );
-    // bottom triangle
-    shapes.triangle.draw(
-      context,
-      program_state,
-      model_transform
-        .times(this.getBaseTransform())
-        .times(Mat4.translation(0, -2, 0))
-        .times(Mat4.rotation(0, 0, 1, 0))
-        .times(Mat4.scale(5, 2, 6)),
-      material_override ??
-      phong_material.override({
-        ambient: 0.9,
-        diffusivity: 0.0,
-        color: this.wingsuitOrange,
-        light_depth_texture,
-      })
-    );
+    // shapes.sphere.draw(
+    //   context,
+    //   program_state,
+    //   model_transform
+    //     .times(this.getBaseTransform())
+    //     .times(Mat4.scale(1.5, 1.5, 1.5)),
+    //   material_override ??
+    //   phong_material.override({
+    //     ambient: 0.9,
+    //     diffusivity: 0.0,
+    //     color: this.wingsuitOrange,
+    //     light_depth_texture,
+    //   })
+    // );
+    //
+    // shapes.triangle.draw(
+    //   context,
+    //   program_state,
+    //   model_transform
+    //     .times(this.getBaseTransform())
+    //     .times(Mat4.rotation(Math.PI / 2, 0, 1, 0))
+    //     .times(Mat4.scale(2, 1, 5)),
+    //   material_override ??
+    //   phong_material.override({
+    //     ambient: 0.9,
+    //     diffusivity: 0.0,
+    //     color: this.wingsuitOrange,
+    //     light_depth_texture,
+    //   })
+    // );
+    //
+    // shapes.triangle.draw(
+    //   context,
+    //   program_state,
+    //   model_transform
+    //     .times(this.getBaseTransform())
+    //     .times(Mat4.rotation(-Math.PI / 2, 0, 1, 0))
+    //     .times(Mat4.scale(2, 1, 5)),
+    //   material_override ??
+    //   phong_material.override({
+    //     ambient: 0.9,
+    //     diffusivity: 0.0,
+    //     color: this.wingsuitOrange,
+    //     light_depth_texture,
+    //   })
+    // );
+    // // bottom triangle
+    // shapes.triangle.draw(
+    //   context,
+    //   program_state,
+    //   model_transform
+    //     .times(this.getBaseTransform())
+    //     .times(Mat4.translation(0, -2, 0))
+    //     .times(Mat4.rotation(0, 0, 1, 0))
+    //     .times(Mat4.scale(5, 2, 6)),
+    //   material_override ??
+    //   phong_material.override({
+    //     ambient: 0.9,
+    //     diffusivity: 0.0,
+    //     color: this.wingsuitOrange,
+    //     light_depth_texture,
+    //   })
+    // );
   }
 }
 export class Ring extends GameObject {
@@ -310,15 +324,15 @@ export class Ground extends GameObject {
   constructor(baseTransform) {
     super(baseTransform);
 
-    for (let i = 0; i < 50; i++) {
-      const x = Math.random() * 400 - 200;
-      const y = Math.random() * 400;
+    for (let i = 0; i < 100; i++) {
+      const x = Math.random() * 1000 - 200;
+      const y = Math.random() * 1000;
       const z = -5;
       this.children.push(new Tree(Mat4.translation(x, y, z)));
     }
-    for (let i = 0; i < 25; i++) {
-      const x = Math.random() * 400 - 200;
-      const y = Math.random() * 400;
+    for (let i = 0; i < 50; i++) {
+      const x = Math.random() * 1000 - 200;
+      const y = Math.random() * 1000;
       const z = -5;
       this.children.push(new Rock(Mat4.translation(x, y, z)));
     }
@@ -336,7 +350,7 @@ export class Ground extends GameObject {
       program_state,
       model_transform
         .times(this.getBaseTransform())
-        .times(groundRotation.times(Mat4.scale(1000, 1000, 1))),
+        .times(groundRotation.times(Mat4.scale(3000, 3000, 1))),
       material_override ?? snowTexture.override({ light_depth_texture })
     );
 
