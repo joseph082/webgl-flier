@@ -25,7 +25,16 @@ const {
   Scene,
 } = tiny;
 
-const BANK_ANGLE = 0.015;
+const BANK_ANGLE = 0.015; // How sharp the turns are
+const MAX_VERTICAL_ANGLE = -0.2; // Player will always be angled somewhat downward
+const INITIAL_HEIGHT = 600;
+const INITIAL_SPEED = 200;
+const MAX_SPEED = 600;
+const MIN_SPEED = 100;
+const DIVE_ACCELERATION = 5;
+const FLATTEN_DECELERATION = 1;
+const CAM_DISTANCE = 20; // How far the camera is from the player
+const LATERAL_SPEED = 20;
 
 export class Game extends Scene {
   constructor() {
@@ -40,9 +49,9 @@ export class Game extends Scene {
       square_2d: new defs.Square(),
     };
 
-    this.playerPosition = vec3(0, 600, 5);
+    this.playerPosition = vec3(0, INITIAL_HEIGHT, 5);
     this.playerVelocity = vec3(0, -0.5, 1);
-    this.speed = 200;
+    this.speed = INITIAL_SPEED;
     this.playerAcceleration = vec3(0, 0, 0);
     this.player = new Player(Mat4.translation(...this.playerPosition));
     this.followCamera = true;
@@ -76,9 +85,9 @@ export class Game extends Scene {
     };
 
     this.initial_camera_location = Mat4.look_at(
-      vec3(0, 20, -20),
-      vec3(0, 20, 0),
-      vec3(0, 1, 0)
+        vec3(0, 20, -20),
+        vec3(0, 20, 0),
+        vec3(0, 1, 0)
     );
 
     this.depth_tex = new Material(new Depth_Texture_Shader_2D(), {
@@ -105,9 +114,9 @@ export class Game extends Scene {
 
   flatten_up() {
     console.log(this.playerVelocity)
-    if (this.speed > 100)
-      this.speed--;
-    if (this.playerVelocity[1] < -0.2)
+    if (this.speed > MIN_SPEED)
+      this.speed-=FLATTEN_DECELERATION;
+    if (this.playerVelocity[1] < MAX_VERTICAL_ANGLE)
       this.playerVelocity.add_by(vec3(0, 0.01, 0));
     // let angleDif = Math.acos(Math.sqrt(this.playerVelocity[1]**2 + this.playerVelocity[2]**2));
     // console.log(angleDif);
@@ -134,8 +143,8 @@ export class Game extends Scene {
   dive_down() {
     console.log(this.playerVelocity)
 
-    if (this.speed < 600)
-      this.speed+=5;
+    if (this.speed < MAX_SPEED)
+      this.speed+=DIVE_ACCELERATION;
     this.playerVelocity.add_by(vec3(0, -0.01, 0));
     // let angleDif = Math.acos(Math.sqrt(this.playerVelocity[1]**2 + this.playerVelocity[2]**2));
     // console.log(angleDif);    // let clockwiseRotation = (0 < this.playerVelocity[0] && 0 < this.playerVelocity[2]) || (this.playerVelocity[0] < 0 || this.playerVelocity[2] < 0);
@@ -207,15 +216,15 @@ export class Game extends Scene {
     this.lightDepthTextureSize = LIGHT_DEPTH_TEX_SIZE;
     gl.bindTexture(gl.TEXTURE_2D, this.lightDepthTexture);
     gl.texImage2D(
-      gl.TEXTURE_2D, // target
-      0, // mip level
-      gl.DEPTH_COMPONENT, // internal format
-      this.lightDepthTextureSize, // width
-      this.lightDepthTextureSize, // height
-      0, // border
-      gl.DEPTH_COMPONENT, // format
-      gl.UNSIGNED_INT, // type
-      null
+        gl.TEXTURE_2D, // target
+        0, // mip level
+        gl.DEPTH_COMPONENT, // internal format
+        this.lightDepthTextureSize, // width
+        this.lightDepthTextureSize, // height
+        0, // border
+        gl.DEPTH_COMPONENT, // format
+        gl.UNSIGNED_INT, // type
+        null
     ); // data
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -226,11 +235,11 @@ export class Game extends Scene {
     this.lightDepthFramebuffer = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.lightDepthFramebuffer);
     gl.framebufferTexture2D(
-      gl.FRAMEBUFFER, // target
-      gl.DEPTH_ATTACHMENT, // attachment point
-      gl.TEXTURE_2D, // texture target
-      this.lightDepthTexture, // texture
-      0
+        gl.FRAMEBUFFER, // target
+        gl.DEPTH_ATTACHMENT, // attachment point
+        gl.TEXTURE_2D, // texture target
+        this.lightDepthTexture, // texture
+        0
     ); // mip level
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
@@ -239,15 +248,15 @@ export class Game extends Scene {
     this.unusedTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, this.unusedTexture);
     gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.RGBA,
-      this.lightDepthTextureSize,
-      this.lightDepthTextureSize,
-      0,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      null
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        this.lightDepthTextureSize,
+        this.lightDepthTextureSize,
+        0,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        null
     );
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -255,11 +264,11 @@ export class Game extends Scene {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     // attach it to the framebuffer
     gl.framebufferTexture2D(
-      gl.FRAMEBUFFER, // target
-      gl.COLOR_ATTACHMENT0, // attachment point
-      gl.TEXTURE_2D, // texture target
-      this.unusedTexture, // texture
-      0
+        gl.FRAMEBUFFER, // target
+        gl.COLOR_ATTACHMENT0, // attachment point
+        gl.TEXTURE_2D, // texture target
+        this.unusedTexture, // texture
+        0
     ); // mip level
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
@@ -271,14 +280,14 @@ export class Game extends Scene {
 
     for (let object of this.objects) {
       // if (object === this.ground && !shadow_pass) {
-        // continue;
+      // continue;
       // }
       object.draw(
-        context,
-        program_state,
-        Mat4.identity(),
-        material_override,
-        shadow_pass ? this.light_depth_texture : null
+          context,
+          program_state,
+          Mat4.identity(),
+          material_override,
+          shadow_pass ? this.light_depth_texture : null
       );
     }
   }
@@ -318,7 +327,7 @@ export class Game extends Scene {
     // Setup -- This part sets up the scene's overall camera matrix, projection matrix, and lights:
     if (!context.scratchpad.controls) {
       this.children.push(
-        (context.scratchpad.controls = new defs.Movement_Controls())
+          (context.scratchpad.controls = new defs.Movement_Controls())
       );
 
       // Define the global camera and projection matrices, which are stored in program_state.
@@ -333,12 +342,13 @@ export class Game extends Scene {
     v.scale_by(dt);
     this.playerPosition.add_by(v);
 
-    let lateralVec = this.playerVelocity.cross(vec(0, 1, 0));
-    this.playerPosition.add_by(lateralVec.times(this.lateral_value/10));
+    let lateralVec = this.playerVelocity.cross(vec(0, 1, 0)).times(this.lateral_value);
+    lateralVec.scale_by(dt*LATERAL_SPEED);
+    this.playerPosition.add_by(lateralVec);
 
     let rotAngle = vec3(0, 0, 1).cross(this.playerVelocity);
 
-    let playerMatrix = Mat4.identity().times(Mat4.translation(...this.playerPosition)).times(Mat4.rotation(this.lateral_value/60, ...this.playerVelocity)).times(Mat4.rotation(Math.asin(rotAngle.norm()), ...rotAngle));
+    let playerMatrix = Mat4.identity().times(Mat4.translation(...this.playerPosition)).times(Mat4.rotation(this.lateral_value/20, ...this.playerVelocity)).times(Mat4.rotation(Math.asin(rotAngle.norm()), ...rotAngle));
     this.player.setBaseTransform(playerMatrix);
 
     for (let object of this.objects) {
@@ -347,13 +357,13 @@ export class Game extends Scene {
 
     // TODO: Lighting (Requirement 2)
     this.light_position = vec4(
-      this.playerPosition[0],
-      this.playerPosition[1] + 20,
-      this.playerPosition[2] - 40,
-      // 0,
-      // 20,
-      // 0,
-      1
+        this.playerPosition[0],
+        this.playerPosition[1] + 20,
+        this.playerPosition[2] - 40,
+        // 0,
+        // 20,
+        // 0,
+        1
     );
     // The parameters of the Light are: position, color, size
     program_state.lights = [
@@ -361,32 +371,32 @@ export class Game extends Scene {
     ];
 
     this.light_view_target = vec4(
-      // 0,-50,50,
-      this.playerPosition[0],
-      this.playerPosition[1] - 1000,
-      this.playerPosition[2],
-      1
+        // 0,-50,50,
+        this.playerPosition[0],
+        this.playerPosition[1] - 1000,
+        this.playerPosition[2],
+        1
     );
     this.light_field_of_view = (130 * Math.PI) / 180; // 130 degree
 
     const light_view_mat = Mat4.look_at(
-      vec3(
-        this.light_position[0],
-        this.light_position[1],
-        this.light_position[2]
-      ),
-      vec3(
-        this.light_view_target[0],
-        this.light_view_target[1],
-        this.light_view_target[2] - 10
-      ),
-      vec3(1, 0, 0) // assume the light to target will have a up dir of +y, maybe need to change according to your case
+        vec3(
+            this.light_position[0],
+            this.light_position[1],
+            this.light_position[2]
+        ),
+        vec3(
+            this.light_view_target[0],
+            this.light_view_target[1],
+            this.light_view_target[2] - 10
+        ),
+        vec3(1, 0, 0) // assume the light to target will have a up dir of +y, maybe need to change according to your case
     );
     const light_proj_mat = Mat4.perspective(
-      this.light_field_of_view,
-      1,
-      5,
-      500
+        this.light_field_of_view,
+        1,
+        5,
+        500
     );
     // Bind the Depth Texture Buffer
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.lightDepthFramebuffer);
@@ -409,21 +419,21 @@ export class Game extends Scene {
       // const dv = this.playerVelocity.copy();
       // dv.scale_by(-6);
       const desired = Mat4.look_at(
-        // vec3(0, 20, 0),
-        this.playerPosition.minus(this.playerVelocity.times(20)).plus(vec3(0, 15, 0)),
-        this.playerPosition,
-        // vec3(0, 20, -20),
-        // vec3(0, 0, 20),
-        vec3(0, 1, 0)
+          // vec3(0, 20, 0),
+          this.playerPosition.minus(this.playerVelocity.times(CAM_DISTANCE)).plus(vec3(0, CAM_DISTANCE/1.5, 0)),
+          this.playerPosition,
+          // vec3(0, 20, -20),
+          // vec3(0, 0, 20),
+          vec3(0, 1, 0)
       );
       program_state.set_camera(desired);
     }
 
     program_state.projection_transform = Mat4.perspective(
-      Math.PI / 4,
-      context.width / context.height,
-      0.1,
-      1000
+        Math.PI / 4,
+        context.width / context.height,
+        0.1,
+        1000
     );
 
     program_state.view_mat = program_state.camera_inverse;
