@@ -4,7 +4,7 @@ const {vec3, vec4, vec, color, Matrix, Mat4, Light, Shape, Material, Shader, Tex
 const {Cube, Axis_Arrows, Textured_Phong, Phong_Shader, Basic_Shader, Subdivision_Sphere} = defs
 
 // The size of the light texture buffer
-export const LIGHT_DEPTH_TEX_SIZE = 8192;
+export const LIGHT_DEPTH_TEX_SIZE = 16384;
 
 export class Color_Phong_Shader extends defs.Phong_Shader {
         vertex_glsl_code() {
@@ -106,7 +106,7 @@ export class Shadow_Textured_Phong_Shader extends defs.Phong_Shader {
                 // pixel fragment's proximity to each of the 3 vertices (barycentric interpolation).
                 varying vec3 N, vertex_worldspace;
                 // ***** PHONG SHADING HAPPENS HERE: *****                                       
-                vec3 phong_model_lights( vec3 N, vec3 vertex_worldspace, 
+                vec3 phong_model_lights( vec3 N, vec3 vertex_worldspace, vec3 tex_color, 
                         out vec3 light_diffuse_contribution, out vec3 light_specular_contribution ){                                        
                     // phong_model_lights():  Add up the lights' contributions.
                     vec3 E = normalize( camera_center - vertex_worldspace );
@@ -132,10 +132,10 @@ export class Shadow_Textured_Phong_Shader extends defs.Phong_Shader {
                         float specular = pow( max( dot( N, H ), 0.0 ), smoothness );
                         float attenuation = 1.0 / (1.0 + light_attenuation_factors[i] * distance_to_light * distance_to_light );
                         
-                        vec3 light_contribution = shape_color.xyz * light_colors[i].xyz * diffusivity * diffuse
+                        vec3 light_contribution = (shape_color.xyz + tex_color) * light_colors[i].xyz * diffusivity * diffuse
                                                                   + light_colors[i].xyz * specularity * specular;
-                        light_diffuse_contribution += attenuation * shape_color.xyz * light_colors[i].xyz * diffusivity * diffuse;
-                        light_specular_contribution += attenuation * shape_color.xyz * specularity * specular;
+                        light_diffuse_contribution += attenuation * (shape_color.xyz + tex_color) * light_colors[i].xyz * diffusivity * diffuse;
+                        light_specular_contribution += attenuation * (shape_color.xyz + tex_color) * specularity * specular;
                         result += attenuation * light_contribution;
                       }
                     return result;
@@ -206,7 +206,7 @@ export class Shadow_Textured_Phong_Shader extends defs.Phong_Shader {
                     
                     // Compute the final color with contributions from lights:
                     vec3 diffuse, specular;
-                    vec3 other_than_ambient = phong_model_lights( normalize( N ), vertex_worldspace, diffuse, specular );
+                    vec3 other_than_ambient = phong_model_lights( normalize( N ), vertex_worldspace, tex_color.xyz, diffuse, specular );
                     
                     // Deal with shadow:
                     if (draw_shadow) {
@@ -227,8 +227,7 @@ export class Shadow_Textured_Phong_Shader extends defs.Phong_Shader {
                         float shadowness = PCF_shadow(light_tex_coord.xy, projected_depth);
                         
                         if (inRange && shadowness > 0.3) {
-                            // diffuse *= 0.2 + 0.8 * (1.0 - shadowness);
-                            diffuse *= 0.0;
+                            diffuse *= 0.2 + 0.8 * (1.0 - shadowness);
                             specular *= 1.0 - shadowness;
                         }
                     }
@@ -291,7 +290,7 @@ export class Shadow_Textured_Phong_Shader extends defs.Phong_Shader {
             }
             if (gpu_state.draw_shadow) {
                 context.uniform1i(gpu_addresses.draw_shadow, 1);
-                context.uniform1f(gpu_addresses.light_depth_bias, 0.0003);
+                context.uniform1f(gpu_addresses.light_depth_bias, 0.00003);
                 context.uniform1f(gpu_addresses.light_texture_size, LIGHT_DEPTH_TEX_SIZE);
                 context.uniform1i(gpu_addresses.light_depth_texture, 1); // 1 for light-view depth texture}
                 if (material.light_depth_texture && material.light_depth_texture.ready) {

@@ -77,18 +77,20 @@ const phong_material = new Material(new Shadow_Textured_Phong_Shader(1));
 const rockTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
   // color: hex_color("#7F8386"), // <-- changed base color to black
   ambient: 0.6, // <-- changed ambient to 1
-  diffusivity: 0.6, // <-- changed ambient to 1
-  // color_texture: new Texture("assets/rock_texture.jpg"),
-  color: hex_color("#AAAAAA"),
+  diffusivity: 0.3, // <-- changed ambient to 1
+  specularity: 0.2, // <-- changed ambient to 1
+  color_texture: new Texture("assets/rock_texture.jpg"),
+  // color: hex_color("#AAAAAA"),
   smoothness: 64,
   specularity: 0.4,
   light_depth_texture: null,
 });
 const snowTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
   ambient: 0.6, // <-- changed ambient to 1
-  diffusivity: 0.6, // <-- changed ambient to 1
-  // color_texture: new Texture("assets/Snow004_1K_Color.jpg"),
-  color: hex_color("#FFFFFF"),
+  diffusivity: 0.3, // <-- changed ambient to 1
+  specularity: 0.2,
+  color_texture: new Texture("assets/Snow004_1K_Color.jpg"),
+  // shape_color: hex_color("#FFFFFF"),
   smoothness: 64,
   specularity: 0.4,
   light_depth_texture: null,

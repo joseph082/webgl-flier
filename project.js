@@ -27,10 +27,14 @@ const {
 
 const BANK_ANGLE = 0.015; // How sharp the turns are
 const MAX_VERTICAL_ANGLE = -0.2; // Player will always be angled somewhat downward
-const INITIAL_HEIGHT = 600;
-const INITIAL_SPEED = 200;
-const MAX_SPEED = 600;
-const MIN_SPEED = 100;
+// const INITIAL_HEIGHT = 600;
+// const INITIAL_SPEED = 200;
+// const MAX_SPEED = 600;
+// const MIN_SPEED = 100;
+const INITIAL_HEIGHT = 50;
+const INITIAL_SPEED = 26;
+const MAX_SPEED = 50;
+const MIN_SPEED = 13;
 const DIVE_ACCELERATION = 5;
 const FLATTEN_DECELERATION = 1;
 const CAM_DISTANCE = 20; // How far the camera is from the player
@@ -358,10 +362,10 @@ export class Game extends Scene {
     // TODO: Lighting (Requirement 2)
     this.light_position = vec4(
         this.playerPosition[0],
-        this.playerPosition[1] + 20,
-        this.playerPosition[2] - 40,
+        this.playerPosition[1] + 300,
+        this.playerPosition[2] - 200,
         // 0,
-        // 20,
+        // 500,
         // 0,
         1
     );
@@ -373,11 +377,11 @@ export class Game extends Scene {
     this.light_view_target = vec4(
         // 0,-50,50,
         this.playerPosition[0],
-        this.playerPosition[1] - 1000,
+        this.playerPosition[1] - 100,
         this.playerPosition[2],
         1
     );
-    this.light_field_of_view = (130 * Math.PI) / 180; // 130 degree
+    this.light_field_of_view = (150 * Math.PI) / 180; // 130 degree
 
     const light_view_mat = Mat4.look_at(
         vec3(
@@ -396,7 +400,7 @@ export class Game extends Scene {
         this.light_field_of_view,
         1,
         5,
-        500
+        5000
     );
     // Bind the Depth Texture Buffer
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.lightDepthFramebuffer);
