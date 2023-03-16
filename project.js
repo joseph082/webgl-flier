@@ -187,6 +187,8 @@ export class Game extends Scene {
     this.new_line();
     this.key_triggered_button("Pause", [" "], () => this.paused = !this.paused);
     this.key_triggered_button("Reset", ["Escape"], () => this.reset());
+    this.new_line();
+    this.key_triggered_button("Toggle Free Cam", ["l"], () => this.followCamera = !this.followCamera);
   }
 
   reset() {
@@ -198,12 +200,23 @@ export class Game extends Scene {
     this.player = new Player(Mat4.translation(...this.playerPosition));
     this.followCamera = true;
 
+    this.rings = [];
+
+    // Generate rings.
+    for (let i = 0; i < 10; i++) {
+      const x = Math.random() * 400 - 200;
+      const z = 200 + 180 * i;
+      const y = -z * Math.sin(Math.PI / 6) + 50 - 20 * Math.random() - 10 * i;
+      this.rings.push(new Ring(
+        Mat4.translation(x, y, z).times(Mat4.scale(15, 15, 15))
+      ));
+    }
+
     this.ground = new Ground(Mat4.identity());
     this.objects = [
       this.ground,
       this.player,
-      new Ring(Mat4.translation(0, -80, 250).times(Mat4.scale(15, 15, 15))),
-      new Ring(Mat4.translation(10, -160, 400).times(Mat4.scale(15, 15, 15))),
+      ...this.rings
     ];
 
     this.flatten_up_press = false;
