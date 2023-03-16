@@ -31,7 +31,7 @@ const MAX_VERTICAL_ANGLE = -0.2; // Player will always be angled somewhat downwa
 // const INITIAL_SPEED = 200;
 // const MAX_SPEED = 600;
 // const MIN_SPEED = 100;
-const INITIAL_HEIGHT = 50;
+const INITIAL_HEIGHT = 80;
 const INITIAL_SPEED = 26;
 const MAX_SPEED = 50;
 const MIN_SPEED = 13;
@@ -64,8 +64,8 @@ export class Game extends Scene {
     this.objects = [
       this.ground,
       this.player,
-      new Ring(Mat4.translation(0, 0, 50).times(Mat4.scale(15, 15, 15))),
-      new Ring(Mat4.scale(15, 15, 15).times(Mat4.translation(1, -15, 30))),
+      new Ring(Mat4.translation(0, -80, 250).times(Mat4.scale(15, 15, 15))),
+      new Ring(Mat4.translation(10, -160, 400).times(Mat4.scale(15, 15, 15))),
     ];
 
     this.pure = new Material(new Color_Phong_Shader(), {});

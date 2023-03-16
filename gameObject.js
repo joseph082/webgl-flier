@@ -71,7 +71,20 @@ const shapes = {
   triangle: new defs.Cone_Tip(10, 10),
   torus: new defs.Torus(16, 16),
   cube: new defs.Cube(),
+  cone: new defs.Closed_Cone(10, 10),
+  cylinder: new defs.Rounded_Capped_Cylinder(20, 20, [0, 20])
 };
+
+for (let i = 0; i < shapes.square.arrays.texture_coord.length; i++) {
+  shapes.square.arrays.texture_coord[i][0] *= 15;
+  shapes.square.arrays.texture_coord[i][1] *= 15;
+}
+
+for (let i = 0; i < shapes.cone.arrays.texture_coord.length; i++) {
+  shapes.cone.arrays.texture_coord[i][0] /= 10;
+  shapes.cone.arrays.texture_coord[i][1] /= 10;
+}
+
 
 const phong_material = new Material(new Shadow_Textured_Phong_Shader(1));
 const rockTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
@@ -79,21 +92,36 @@ const rockTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
   ambient: 0.6, // <-- changed ambient to 1
   diffusivity: 0.3, // <-- changed ambient to 1
   specularity: 0.2, // <-- changed ambient to 1
-  color_texture: new Texture("assets/rock_texture.jpg"),
-  // color: hex_color("#AAAAAA"),
+  // color_texture: new Texture("assets/rock.png"),
+  color: hex_color("#555555"),
   smoothness: 64,
-  specularity: 0.4,
   light_depth_texture: null,
 });
 const snowTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
   ambient: 0.6, // <-- changed ambient to 1
   diffusivity: 0.3, // <-- changed ambient to 1
   specularity: 0.2,
-  color_texture: new Texture("assets/Snow004_1K_Color.jpg"),
-  // shape_color: hex_color("#FFFFFF"),
+  // color_texture: new Texture("assets/snow3.png"),
+  color: hex_color("#FFFFFF"),
   smoothness: 64,
-  specularity: 0.4,
   light_depth_texture: null,
+});
+const barkTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
+  ambient: 1.0,
+  diffusivity: 0.6,
+  specularity: 0.2,
+  color_texture: new Texture("assets/bark.png"),
+  smoothness: 64,
+  light_depth_texture: null
+});
+const leavesTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
+  ambient: 0.6,
+  diffusivity: 0.4,
+  specularity: 0.2,
+  color_texture: new Texture("assets/leaves-with-snow.png"),
+  // color: hex_color("#00FF00"),
+  smoothness: 64,
+  light_depth_texture: null
 });
 
 const groundRotation = Mat4.rotation((Math.PI * 2) / 3, 1, 0, 0);
@@ -113,12 +141,26 @@ export class Player extends GameObject {
     material_override,
     light_depth_texture
   ) {
-    shapes.cube.draw(
+    // shapes.cube.draw(
+    //   context,
+    //   program_state,
+    //   model_transform
+    //     .times(this.getBaseTransform())
+    //     .times(Mat4.scale(1, 0.5, 2.5)),
+    //   material_override ??
+    //   phong_material.override({
+    //     ambient: 0.9,
+    //     diffusivity: 0.0,
+    //     color: this.wingsuitOrange,
+    //     light_depth_texture,
+    //   })
+    // );
+    shapes.sphere.draw(
       context,
       program_state,
       model_transform
         .times(this.getBaseTransform())
-        .times(Mat4.scale(1, 0.5, 2.5)),
+        .times(Mat4.scale(1.5, 1.5, 1.5)),
       material_override ??
       phong_material.override({
         ambient: 0.9,
@@ -127,52 +169,38 @@ export class Player extends GameObject {
         light_depth_texture,
       })
     );
-    // shapes.sphere.draw(
-    //   context,
-    //   program_state,
-    //   model_transform
-    //     .times(this.getBaseTransform())
-    //     .times(Mat4.scale(1.5, 1.5, 1.5)),
-    //   material_override ??
-    //   phong_material.override({
-    //     ambient: 0.9,
-    //     diffusivity: 0.0,
-    //     color: this.wingsuitOrange,
-    //     light_depth_texture,
-    //   })
-    // );
-    //
-    // shapes.triangle.draw(
-    //   context,
-    //   program_state,
-    //   model_transform
-    //     .times(this.getBaseTransform())
-    //     .times(Mat4.rotation(Math.PI / 2, 0, 1, 0))
-    //     .times(Mat4.scale(2, 1, 5)),
-    //   material_override ??
-    //   phong_material.override({
-    //     ambient: 0.9,
-    //     diffusivity: 0.0,
-    //     color: this.wingsuitOrange,
-    //     light_depth_texture,
-    //   })
-    // );
-    //
-    // shapes.triangle.draw(
-    //   context,
-    //   program_state,
-    //   model_transform
-    //     .times(this.getBaseTransform())
-    //     .times(Mat4.rotation(-Math.PI / 2, 0, 1, 0))
-    //     .times(Mat4.scale(2, 1, 5)),
-    //   material_override ??
-    //   phong_material.override({
-    //     ambient: 0.9,
-    //     diffusivity: 0.0,
-    //     color: this.wingsuitOrange,
-    //     light_depth_texture,
-    //   })
-    // );
+    
+    shapes.triangle.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.getBaseTransform())
+        .times(Mat4.rotation(Math.PI / 2, 0, 1, 0))
+        .times(Mat4.scale(2, 1, 5)),
+      material_override ??
+      phong_material.override({
+        ambient: 0.9,
+        diffusivity: 0.0,
+        color: this.wingsuitOrange,
+        light_depth_texture,
+      })
+    );
+    
+    shapes.triangle.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.getBaseTransform())
+        .times(Mat4.rotation(-Math.PI / 2, 0, 1, 0))
+        .times(Mat4.scale(2, 1, 5)),
+      material_override ??
+      phong_material.override({
+        ambient: 0.9,
+        diffusivity: 0.0,
+        color: this.wingsuitOrange,
+        light_depth_texture,
+      })
+    );
     // // bottom triangle
     // shapes.triangle.draw(
     //   context,
@@ -284,40 +312,31 @@ export class Tree extends GameObject {
     light_depth_texture
   ) {
     const TREE_HEIGHT = 10;
-    shapes.trapezoidalPrism.draw(
+    shapes.cylinder.draw(
       context,
       program_state,
       model_transform
         .times(this.getBaseTransform())
         .times(invertedGroundRotation)
-        .times(Mat4.scale(1, TREE_HEIGHT, 1)),
+        .times(Mat4.rotation(-Math.PI / 2, 1, 0, 0))
+        .times(Mat4.scale(2, 2, TREE_HEIGHT)),
       material_override ??
-      phong_material.override({
-        ambient: 0.4,
-        diffusivity: 0.6,
-        color: hex_color("#964B00"),
-        light_depth_texture,
-      })
+      barkTexture.override({ light_depth_texture })
     );
 
     // position of this might be centered? so needs to scale more?
     //tree leaves
-    shapes.trapezoidalPrism.draw(
+    shapes.cone.draw(
       context,
       program_state,
       model_transform
         .times(this.getBaseTransform())
         .times(invertedGroundRotation)
-        .times(
-          Mat4.translation(0, 10, 0).times(Mat4.scale(1.5, TREE_HEIGHT, 1.5))
-        ),
+        .times(Mat4.rotation(-Math.PI / 2, 1, 0, 0))
+        .times(Mat4.translation(0, 0, 15))
+        .times(Mat4.scale(4.5, 4.5, TREE_HEIGHT)),
       material_override ??
-      phong_material.override({
-        ambient: 0.4,
-        diffusivity: 0.6,
-        color: hex_color("#2C493F"),
-        light_depth_texture,
-      })
+      leavesTexture.override({ light_depth_texture })
     );
   }
 }
@@ -330,13 +349,13 @@ export class Ground extends GameObject {
       const x = Math.random() * 1000 - 200;
       const y = Math.random() * 1000;
       const z = -5;
-      this.children.push(new Tree(Mat4.translation(x, y, z)));
+      this.children.push(new Tree(Mat4.translation(x, y, z).times(Mat4.scale(1, 1, 1))));
     }
     for (let i = 0; i < 50; i++) {
       const x = Math.random() * 1000 - 200;
       const y = Math.random() * 1000;
       const z = -5;
-      this.children.push(new Rock(Mat4.translation(x, y, z)));
+      this.children.push(new Rock(Mat4.translation(x, y, z).times(Mat4.scale(1.5, 1.5, 1.5))));
     }
   }
 

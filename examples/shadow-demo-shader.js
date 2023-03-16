@@ -290,7 +290,7 @@ export class Shadow_Textured_Phong_Shader extends defs.Phong_Shader {
             }
             if (gpu_state.draw_shadow) {
                 context.uniform1i(gpu_addresses.draw_shadow, 1);
-                context.uniform1f(gpu_addresses.light_depth_bias, 0.00003);
+                context.uniform1f(gpu_addresses.light_depth_bias, 0.0003);
                 context.uniform1f(gpu_addresses.light_texture_size, LIGHT_DEPTH_TEX_SIZE);
                 context.uniform1i(gpu_addresses.light_depth_texture, 1); // 1 for light-view depth texture}
                 if (material.light_depth_texture && material.light_depth_texture.ready) {
