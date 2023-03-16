@@ -93,21 +93,18 @@ export class GameObject {
 const shapes = {
   square: new defs.Square(),
   trapezoidalPrism:
-    new (defs.Capped_Cylinder.prototype.make_flat_shaded_version())(10, 10, [
-      [0, 2],
-      [0, 2],
-    ]),
+    new defs.Capped_Cylinder(10, 10, Mat4.scale(3, 1, 1)),
   sphere: new defs.Subdivision_Sphere(8),
   triangle: new defs.Cone_Tip(10, 10),
   torus: new defs.Torus(16, 16),
   cube: new defs.Cube(),
   cone: new defs.Closed_Cone(10, 10),
-  cylinder: new defs.Rounded_Capped_Cylinder(20, 20)
+  cylinder: new defs.Rounded_Capped_Cylinder(10, 10)
 };
 
 for (let i = 0; i < shapes.square.arrays.texture_coord.length; i++) {
-  shapes.square.arrays.texture_coord[i][0] *= 15;
-  shapes.square.arrays.texture_coord[i][1] *= 15;
+  shapes.square.arrays.texture_coord[i][0] *= 50;
+  shapes.square.arrays.texture_coord[i][1] *= 50;
 }
 
 for (let i = 0; i < shapes.cone.arrays.texture_coord.length; i++) {
@@ -115,6 +112,10 @@ for (let i = 0; i < shapes.cone.arrays.texture_coord.length; i++) {
   shapes.cone.arrays.texture_coord[i][1] /= 10;
 }
 
+// for (let i = 0; i < shapes.trapezoidalPrism.arrays.texture_coord.length; i++) {
+//   shapes.trapezoidalPrism.arrays.texture_coord[i][0] /= 8;
+//   shapes.trapezoidalPrism.arrays.texture_coord[i][1] /= 8;
+// }
 
 const phong_material = new Material(new Shadow_Textured_Phong_Shader(1));
 const rockTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
@@ -122,8 +123,8 @@ const rockTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
   ambient: 0.6, // <-- changed ambient to 1
   diffusivity: 0.3, // <-- changed ambient to 1
   specularity: 0.2, // <-- changed ambient to 1
-  // color_texture: new Texture("assets/rock.png"),
-  color: hex_color("#555555"),
+  color_texture: new Texture("assets/rock2.png"),
+  // color: hex_color("#555555"),
   smoothness: 64,
   light_depth_texture: null,
 });
@@ -131,8 +132,8 @@ const snowTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
   ambient: 0.6, // <-- changed ambient to 1
   diffusivity: 0.3, // <-- changed ambient to 1
   specularity: 0.2,
-  // color_texture: new Texture("assets/snow3.png"),
-  color: hex_color("#FFFFFF"),
+  color_texture: new Texture("assets/snow3.png"),
+  // color: hex_color("#FFFFFF"),
   smoothness: 64,
   light_depth_texture: null,
 });
@@ -148,7 +149,7 @@ const leavesTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
   ambient: 0.6,
   diffusivity: 0.4,
   specularity: 0.2,
-  color_texture: new Texture("assets/leaves-with-snow.png"),
+  color_texture: new Texture("assets/snow2.png"),
   // color: hex_color("#00FF00"),
   smoothness: 64,
   light_depth_texture: null
@@ -375,13 +376,13 @@ export class Ground extends GameObject {
   constructor(baseTransform) {
     super(baseTransform);
 
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 60; i++) {
       const x = Math.random() * 2000 - 1000;
       const y = Math.random() * 2000;
       const z = -5;
-      this.children.push(new Tree(Mat4.translation(x, y, z).times(Mat4.scale(1, 1, 1))));
+      this.children.push(new Tree(Mat4.translation(x, y, z).times(Mat4.scale(2, 3, 2))));
     }
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 40; i++) {
       const x = Math.random() * 2000 - 1000;
       const y = Math.random() * 2000;
       const z = -5;

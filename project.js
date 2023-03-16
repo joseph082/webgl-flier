@@ -31,14 +31,15 @@ const MAX_VERTICAL_ANGLE = -0.2; // Player will always be angled somewhat downwa
 // const INITIAL_SPEED = 200;
 // const MAX_SPEED = 600;
 // const MIN_SPEED = 100;
+// const LATERAL_SPEED = 20;
 const INITIAL_HEIGHT = 80;
-const INITIAL_SPEED = 26;
-const MAX_SPEED = 50;
-const MIN_SPEED = 13;
+const INITIAL_SPEED = 45;
+const MAX_SPEED = 90;
+const MIN_SPEED = 40;
+const LATERAL_SPEED = 10;
 const DIVE_ACCELERATION = 5;
 const FLATTEN_DECELERATION = 1;
 const CAM_DISTANCE = 20; // How far the camera is from the player
-const LATERAL_SPEED = 20;
 
 export class Game extends Scene {
   constructor() {
@@ -362,9 +363,24 @@ export class Game extends Scene {
       this.playerPosition.add_by(lateralVec);     
     }
 
-    let rotAngle = vec3(0, 0, 1).cross(this.playerVelocity);
+    let rotAngle = vec3(0, 0, Math.sign(this.playerVelocity[2])).cross(this.playerVelocity);
+
+    // console.log(Math.asin(rotAngle.norm()));
+ 
+    const desired = Mat4.look_at(
+      // vec3(0, 20, 0),
+      vec3(0,0,0).minus(vec3(this.playerVelocity[0], 0, this.playerVelocity[2])),
+      vec3(0,0,0),
+      // vec3(0, 20, -20),
+      // vec3(0, 0, 20),
+      vec3(0, -1, 0)
+    );
     
-    let playerMatrix = Mat4.identity().times(Mat4.translation(...this.playerPosition)).times(Mat4.rotation(this.lateral_value/20, ...this.playerVelocity)).times(Mat4.rotation(Math.asin(rotAngle.norm()), ...rotAngle));
+    let playerMatrix = Mat4.identity()
+      .times(Mat4.translation(...this.playerPosition))
+      .times(Mat4.rotation(this.lateral_value/20, ...this.playerVelocity))
+      .times(desired)
+      ;
     this.player.setBaseTransform(playerMatrix);
 
     for (let object of this.objects) {
