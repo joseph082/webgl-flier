@@ -72,7 +72,7 @@ const shapes = {
   torus: new defs.Torus(16, 16),
   cube: new defs.Cube(),
   cone: new defs.Closed_Cone(10, 10),
-  cylinder: new defs.Rounded_Capped_Cylinder(20, 20, [0, 20])
+  cylinder: new defs.Rounded_Capped_Cylinder(20, 20)
 };
 
 for (let i = 0; i < shapes.square.arrays.texture_coord.length; i++) {
@@ -345,15 +345,15 @@ export class Ground extends GameObject {
   constructor(baseTransform) {
     super(baseTransform);
 
-    for (let i = 0; i < 100; i++) {
-      const x = Math.random() * 1000 - 200;
-      const y = Math.random() * 1000;
+    for (let i = 0; i < 200; i++) {
+      const x = Math.random() * 2000 - 1000;
+      const y = Math.random() * 2000;
       const z = -5;
       this.children.push(new Tree(Mat4.translation(x, y, z).times(Mat4.scale(1, 1, 1))));
     }
-    for (let i = 0; i < 50; i++) {
-      const x = Math.random() * 1000 - 200;
-      const y = Math.random() * 1000;
+    for (let i = 0; i < 100; i++) {
+      const x = Math.random() * 2000 - 1000;
+      const y = Math.random() * 2000;
       const z = -5;
       this.children.push(new Rock(Mat4.translation(x, y, z).times(Mat4.scale(1.5, 1.5, 1.5))));
     }

@@ -53,20 +53,7 @@ export class Game extends Scene {
       square_2d: new defs.Square(),
     };
 
-    this.playerPosition = vec3(0, INITIAL_HEIGHT, 5);
-    this.playerVelocity = vec3(0, -0.5, 1);
-    this.speed = INITIAL_SPEED;
-    this.playerAcceleration = vec3(0, 0, 0);
-    this.player = new Player(Mat4.translation(...this.playerPosition));
-    this.followCamera = true;
-
-    this.ground = new Ground(Mat4.identity());
-    this.objects = [
-      this.ground,
-      this.player,
-      new Ring(Mat4.translation(0, -80, 250).times(Mat4.scale(15, 15, 15))),
-      new Ring(Mat4.translation(10, -160, 400).times(Mat4.scale(15, 15, 15))),
-    ];
+    this.reset();
 
     this.pure = new Material(new Color_Phong_Shader(), {});
     this.shader = new Material(new Color_Phong_Shader(), { ambient: 1.0 });
@@ -101,15 +88,6 @@ export class Game extends Scene {
       specularity: 0,
       texture: null,
     });
-
-    this.flatten_up_press = false;
-    this.dive_down_press = false;
-    this.bank_left_press = false;
-    this.bank_right_press = false;
-    this.lateral_left_press = false;
-    this.lateral_right_press = false;
-
-    this.lateral_value = 0;
   }
 
   left_vector() {
@@ -194,12 +172,6 @@ export class Game extends Scene {
 
   make_control_panel() {
     // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
-    this.key_triggered_button(
-        "Attach to wingsuit",
-        ["Control", "0"],
-        () => (this.followCamera = !this.followCamera)
-    );
-    this.new_line();
     this.key_triggered_button("Flatten", ["w"], () => this.flatten_up_press = true, "#6E6460", () => this.flatten_up_press = false);
     this.key_triggered_button("Dive down", ["s"], () => this.dive_down_press = true, "#6E6460", () => this.dive_down_press = false);
     this.new_line();
@@ -208,6 +180,36 @@ export class Game extends Scene {
     this.new_line();
     this.key_triggered_button("Lateral Move Left", ["q"], () => this.lateral_left_press = true, "#6E6460", () => this.lateral_left_press = false);
     this.key_triggered_button("Lateral Move Right", ["e"], () => this.lateral_right_press = true, "#6E6460", () => this.lateral_right_press = false);
+    this.new_line();
+    this.key_triggered_button("Pause", [" "], () => this.paused = !this.paused);
+    this.key_triggered_button("Reset", ["Escape"], () => this.reset());
+  }
+
+  reset() {
+    this.playerPosition = vec3(0, INITIAL_HEIGHT, 5);
+    this.playerVelocity = vec3(0, -0.5, 1);
+    this.speed = INITIAL_SPEED;
+    this.playerAcceleration = vec3(0, 0, 0);
+    this.player = new Player(Mat4.translation(...this.playerPosition));
+    this.followCamera = true;
+
+    this.ground = new Ground(Mat4.identity());
+    this.objects = [
+      this.ground,
+      this.player,
+      new Ring(Mat4.translation(0, -80, 250).times(Mat4.scale(15, 15, 15))),
+      new Ring(Mat4.translation(10, -160, 400).times(Mat4.scale(15, 15, 15))),
+    ];
+
+    this.flatten_up_press = false;
+    this.dive_down_press = false;
+    this.bank_left_press = false;
+    this.bank_right_press = false;
+    this.lateral_left_press = false;
+    this.lateral_right_press = false;
+
+    this.lateral_value = 0;
+    this.paused = true;
   }
 
   // NOTE: this function is copied from examples/shadow-demo.js
@@ -298,20 +300,22 @@ export class Game extends Scene {
 
   display(context, program_state) {
 
-    if (this.flatten_up_press)
-      this.flatten_up();
-    if (this.dive_down_press)
-      this.dive_down();
-    if (this.bank_left_press)
-      this.bank_left();
-    if (this.bank_right_press)
-      this.bank_right();
-    if (this.lateral_left_press)
-      this.lateral_left();
-    if (this.lateral_right_press)
-      this.lateral_right();
-    if (!this.lateral_right_press && !this.lateral_left_press && this.lateral_value != 0)
-      this.lateral_value -= (0 < this.lateral_value ? 1 : -1);
+    if (!this.paused) {
+      if (this.flatten_up_press)
+        this.flatten_up();
+      if (this.dive_down_press)
+        this.dive_down();
+      if (this.bank_left_press)
+        this.bank_left();
+      if (this.bank_right_press)
+        this.bank_right();
+      if (this.lateral_left_press)
+        this.lateral_left();
+      if (this.lateral_right_press)
+        this.lateral_right();
+      if (!this.lateral_right_press && !this.lateral_left_press && this.lateral_value != 0)
+        this.lateral_value -= (0 < this.lateral_value ? 1 : -1);
+    }
 
     this.playerVelocity.normalize();
 
@@ -339,19 +343,22 @@ export class Game extends Scene {
     }
 
     const dt = program_state.animation_delta_time / 1000;
+
     const v = this.playerVelocity.times(this.speed);
     // console.log(this.playerVelocity)
     // console.log(this.playerPosition)
 
-    v.scale_by(dt);
-    this.playerPosition.add_by(v);
-
-    let lateralVec = this.playerVelocity.cross(vec(0, 1, 0)).times(this.lateral_value);
-    lateralVec.scale_by(dt*LATERAL_SPEED);
-    this.playerPosition.add_by(lateralVec);
+    if (!this.paused) {
+      v.scale_by(dt);
+      this.playerPosition.add_by(v);
+      
+      let lateralVec = this.playerVelocity.cross(vec(0, 1, 0)).times(this.lateral_value);
+      lateralVec.scale_by(dt*LATERAL_SPEED);
+      this.playerPosition.add_by(lateralVec);     
+    }
 
     let rotAngle = vec3(0, 0, 1).cross(this.playerVelocity);
-
+    
     let playerMatrix = Mat4.identity().times(Mat4.translation(...this.playerPosition)).times(Mat4.rotation(this.lateral_value/20, ...this.playerVelocity)).times(Mat4.rotation(Math.asin(rotAngle.norm()), ...rotAngle));
     this.player.setBaseTransform(playerMatrix);
 
@@ -437,7 +444,7 @@ export class Game extends Scene {
         Math.PI / 4,
         context.width / context.height,
         0.1,
-        1000
+        2000
     );
 
     program_state.view_mat = program_state.camera_inverse;
