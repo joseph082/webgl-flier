@@ -326,6 +326,11 @@ export class Rock extends GameObject {
     this.randomOffsetX = Math.random() * 205;
     this.randomScaling = Math.random() * 1.5 + 0.5;
   }
+
+  checkPlayerCollision() {
+    return false;
+  }
+
   draw(
     context,
     program_state,
@@ -375,9 +380,54 @@ export class Rock extends GameObject {
 export class Tree extends GameObject {
   constructor(baseTransform) {
     super(baseTransform);
+  }
+
+  checkPlayerCollision(
+    playerX,
+    playerY,
+    playerZ,
+    lastPlayerX,
+    lastPlayerY,
+    lastPlayerZ
+  ) {
+    // height = 50, r = 5
+    const treeCoords = groundRotation
+      .times(this.baseTransform)
+      .times(invertedGroundRotation);
+    const treeX = treeCoords[0][3],
+      treeY = treeCoords[1][3],
+      treeZ = treeCoords[2][3];
+    // console.log({ treeX, treeY, treeZ });
+    const collisionRadius = 9;
+    if (
+      playerY > treeY + 50 ||
+      playerY <= treeY ||
+      Math.abs(playerX - treeX) > collisionRadius ||
+      Math.abs(playerZ - treeZ) > collisionRadius
+    ) {
+      return false;
+    }
+    const dy = treeY + 50 - playerY;
+    const circleRadius = (9 / 50) * dy;
+    console.log({
+      dist: Math.sqrt((playerX - treeX) ** 2 + (playerZ - treeZ) ** 2),
+      circleRadius,
+      dL: circleRadius + 6,
+    });
+    if (
+      Math.sqrt((playerX - treeX) ** 2 + (playerZ - treeZ) ** 2) <
+      circleRadius + 6
+    ) {
+      console.log("collided with tree", {
+        dist: Math.sqrt((playerX - treeX) ** 2 + (playerZ - treeZ) ** 2),
+      });
+      return true;
+    }
+    return false;
 
     this.randomOffset = Math.random() * Math.PI;
   }
+
   draw(
     context,
     program_state,
@@ -417,6 +467,10 @@ export class Mountain extends GameObject {
   constructor(baseTransform) {
     super(baseTransform);
   }
+  checkPlayerCollision() {
+    return false;
+  }
+
   draw(
       context,
       program_state,
@@ -424,6 +478,7 @@ export class Mountain extends GameObject {
       material_override,
       light_depth_texture
   ) {
+    return;
     const MOUNTAIN_HEIGHT = 400;
     const MOUNTAIN_WIDTH = 200;
     shapes.rounded_cone.draw(
@@ -501,7 +556,7 @@ export class Ground extends GameObject {
       model_transform
         .times(this.getBaseTransform())
         .times(groundRotation.times(Mat4.scale(3000, 3000, 1))),
-      material_override ?? snowTexture.override({color: hex_color("#808080")})
+      material_override ?? snowTexture.override({ color: hex_color("#808080") })
     );
 
     for (let tree of this.children) {
