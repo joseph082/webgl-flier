@@ -59,37 +59,12 @@ export class GameObject {
     }
   }
 
-  // https://github.com/Robert-Lu/tiny-graphics-demo3/blob/main/examples/collisions-demo.js
-  static intersect_cube(p, margin = 0) {
-    return p.every((value) => value >= -1 - margin && value <= 1 + margin);
-  }
-
-  static intersect_sphere(p, margin = 0) {
-    return p.dot(p) < 1 + margin;
-  }
-
-  check_if_colliding(b, collider) {
-    // check_if_colliding(): Collision detection function.
-    // DISCLAIMER:  The collision method shown below is not used by anyone; it's just very quick
-    // to code.  Making every collision body an ellipsoid is kind of a hack, and looping
-    // through a list of discrete sphere points to see if the ellipsoids intersect is *really* a
-    // hack (there are perfectly good analytic expressions that can test if two ellipsoids
-    // intersect without discretizing them into points).
-    if (this === b) return false;
-    // Nothing collides with itself.
-    // Convert sphere b to the frame where a is a unit sphere:
-    const T = this.inverse.times(
-      b.drawn_location ?? b.getBaseTransform(),
-      this.temp_matrix ?? Mat4.identity()
-    );
-
-    const { intersect_test, points, leeway } = collider;
-    // For each vertex in that b, shift to the coordinate frame of
-    // a_inv*b.  Check if in that coordinate frame it penetrates
-    // the unit sphere at the origin.  Leave some leeway.
-    return points.arrays.position.some((p) =>
-      intersect_test(T.times(p.to4(1)).to3(), leeway)
-    );
+  getPosition() {
+    return {
+      x: this.baseTransform[0][3],
+      y: this.baseTransform[1][3],
+      z: this.baseTransform[2][3],
+    };
   }
 }
 
@@ -185,6 +160,19 @@ export class Player extends GameObject {
     super(baseTransform);
 
     this.wingsuitOrange = hex_color("#DD571C");
+    this.lastBaseTransform = baseTransform;
+  }
+
+  setBaseTransform(transform) {
+    this.lastBaseTransform = this.baseTransform;
+    this.baseTransform = transform;
+  }
+  getLastPosition() {
+    return {
+      x: this.lastBaseTransform[0][3],
+      y: this.lastBaseTransform[1][3],
+      z: this.lastBaseTransform[2][3],
+    };
   }
 
   draw(
@@ -246,25 +234,70 @@ export class Player extends GameObject {
         })
     );
     // // bottom cone
-    // shapes.cone.draw(
-    //   context,
-    //   program_state,
-    //   model_transform
-    //     .times(this.getBaseTransform())
-    //     .times(Mat4.translation(0, -2, 0))
-    //     .times(Mat4.rotation(0, 0, 1, 0))
-    //     .times(Mat4.scale(5, 2, 6)),
-    //   material_override ??
-    //   playerTexutre.override({
-    //     light_depth_texture,
-    //   })
-    // );
+    shapes.cone.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.getBaseTransform())
+        .times(Mat4.translation(0, 0, 5))
+        .times(Mat4.rotation(Math.PI, 0, 1, 0))
+        .times(Mat4.scale(4, 2, 4)),
+      material_override ??
+        playerTexutre.override({
+          light_depth_texture,
+        })
+    );
   }
 }
 export class Ring extends GameObject {
   constructor(baseTransform) {
     super(baseTransform);
+    this.ringSize = baseTransform[0][0];
+    this.collided = false;
   }
+
+  checkPlayerCollision(
+    playerX,
+    playerY,
+    playerZ,
+    lastPlayerX,
+    lastPlayerY,
+    lastPlayerZ
+  ) {
+    if (this.collided) {
+      return false;
+    }
+    const ringZ = this.baseTransform[2][3];
+
+    if (ringZ <= lastPlayerZ || ringZ >= playerZ) {
+      return false;
+    }
+    const ringX = this.baseTransform[0][3],
+      ringY = this.baseTransform[1][3];
+
+    const dx = playerX - lastPlayerX;
+    const dy = playerY - lastPlayerY;
+    const dz = playerZ - lastPlayerZ;
+
+    const dt = dz !== 0 ? (ringZ - lastPlayerZ) / dz : 0;
+    const approxPlayerX = lastPlayerX + dx * dt;
+    const approxPlayerY = lastPlayerY + dy * dt;
+    // console.log({ playerX, lastPlayerX, approxPlayerX });
+    if (
+      Math.sqrt((approxPlayerX - ringX) ** 2 + (approxPlayerY - ringY) ** 2) <
+      this.ringSize / 2 + 5
+    ) {
+      console.log("collided with ring", {
+        dist: Math.sqrt(
+          (approxPlayerX - ringX) ** 2 + (approxPlayerY - ringY) ** 2
+        ),
+      });
+      this.collided = true;
+      return true;
+    }
+    return false;
+  }
+
   draw(
     context,
     program_state,
@@ -342,6 +375,8 @@ export class Rock extends GameObject {
 export class Tree extends GameObject {
   constructor(baseTransform) {
     super(baseTransform);
+
+    this.randomOffset = Math.random() * Math.PI;
   }
   draw(
     context,
@@ -414,7 +449,7 @@ export class Ground extends GameObject {
       const y = Math.random() * 2000;
       const z = -5;
       this.children.push(
-        new Tree(Mat4.translation(x, y, z).times(Mat4.scale(2, 3, 2)))
+        new Tree(Mat4.translation(x, y, z).times(Mat4.scale(2.5, 5, 2.5)))
       );
     }
 
@@ -424,7 +459,7 @@ export class Ground extends GameObject {
       const y = Math.random() * 2000;
       const z = -5;
       this.children.push(
-        new Rock(Mat4.translation(x, y, z).times(Mat4.scale(1.5, 1.5, 1.5)))
+        new Rock(Mat4.translation(x, y, z).times(Mat4.scale(2.5, 2.5, 2.5)))
       );
     }
 
@@ -470,10 +505,14 @@ export class Ground extends GameObject {
     );
 
     for (let tree of this.children) {
+      const transform = model_transform
+        .times(this.getBaseTransform())
+        .times(groundRotation);
+
       tree.draw(
         context,
         program_state,
-        model_transform.times(this.getBaseTransform()).times(groundRotation),
+        transform,
         material_override,
         light_depth_texture
       );

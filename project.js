@@ -5,7 +5,7 @@ import {
   Depth_Texture_Shader_2D,
   LIGHT_DEPTH_TEX_SIZE,
 } from "./examples/shadow-demo-shader.js";
-import { GameObject, Ground, Player, Ring } from "./gameObject.js";
+import { Ground, Player, Ring } from "./gameObject.js";
 import { Text_Line } from "./examples/text-demo.js";
 
 const {
@@ -93,13 +93,6 @@ export class Game extends Scene {
       specularity: 0,
       texture: null,
     });
-
-    // this.collider = {intersect_test: GameObject.intersect_sphere, points: new defs.Subdivision_Sphere(8), leeway: .5};
-    this.collider = {
-      intersect_test: GameObject.intersect_sphere,
-      points: new defs.Subdivision_Sphere(4),
-      leeway: 0,
-    };
   }
 
   left_vector() {
@@ -266,7 +259,7 @@ export class Game extends Scene {
       const z = 200 + 220 * i;
       const y = -z * Math.sin(Math.PI / 6) + 50 - 20 * Math.random() - 10 * i;
       this.rings.push(
-        new Ring(Mat4.translation(x, y, z).times(Mat4.scale(15, 15, 15)))
+        new Ring(Mat4.translation(x, y, z).times(Mat4.scale(25, 25, 25)))
       );
     }
 
@@ -283,16 +276,20 @@ export class Game extends Scene {
     this.lateral_value = 0;
     this.paused = true;
 
-
     const phong = new defs.Phong_Shader();
     const texture = new defs.Textured_Phong(1);
     this.grey = new Material(phong, {
-      color: color(.5, .5, .5, 1), ambient: 0,
-      diffusivity: .3, specularity: .5, smoothness: 10
-    })
+      color: color(0.5, 0.5, 0.5, 1),
+      ambient: 0,
+      diffusivity: 0.3,
+      specularity: 0.5,
+      smoothness: 10,
+    });
     this.text_image = new Material(texture, {
-      ambient: 1, diffusivity: 0, specularity: 0,
-      texture: new Texture("assets/text.png")
+      ambient: 1,
+      diffusivity: 0,
+      specularity: 0,
+      texture: new Texture("assets/text.png"),
     });
   }
 
@@ -555,20 +552,21 @@ export class Game extends Scene {
 
     const time = Math.floor(this.playTime);
     const score = time + this.collidedRings * 2;
-    const scoreString = `Score:${score.toString(10).padStart(4, '0')}`;
+    const scoreString = `Score:${score.toString(10).padStart(4, "0")}`;
     const outputString = `${scoreString}         Time: ${Math.floor(time)}`;
 
     this.shapes.text.set_string(outputString, context.context);
 
     const textScale = 0.03;
     const textDisplacement = Mat4.translation(-0.6, 0.35, -1); // displace slightly in front of camera
-    this.shapes.text.draw(context, program_state,
+    this.shapes.text.draw(
+      context,
+      program_state,
       program_state.camera_transform.times(
-        textDisplacement.times(
-          Mat4.scale(textScale, textScale, textScale))), this.text_image);
-
-
-
+        textDisplacement.times(Mat4.scale(textScale, textScale, textScale))
+      ),
+      this.text_image
+    );
 
     program_state.view_mat = program_state.camera_inverse;
     this.render_scene(context, program_state, true);
@@ -614,21 +612,25 @@ export class Game extends Scene {
     if (this.paused) {
       return;
     }
-    // console.log('update_state',this.player.getBaseTransform());
-    // this.player.inverse = Mat4.inverse(this.player.drawn_location);
-    this.player.inverse = Mat4.inverse(this.player.getBaseTransform());
-    // console.log(JSON.stringify(this.player.getBaseTransform()), 'player base');
-    // console.log(JSON.stringify(this.objects[2].getBaseTransform()), 'first ring base');
-    // console.log(JSON.stringify(this.objects[3].getBaseTransform()), '2nd  ring base');
-    // console.log(JSON.stringify(this.player.getBaseTransform()),'player base');
+    const { x: playerX, y: playerY, z: playerZ } = this.player.getPosition();
+    const {
+      x: lastPlayerX,
+      y: lastPlayerY,
+      z: lastPlayerZ,
+    } = this.player.getLastPosition();
     for (let i = 0; i < this.rings.length; i++) {
-      if (this.rings[i] instanceof Player) {
-        continue;
-      }
-      this.rings[i].inverse = Mat4.inverse(this.rings[i].getBaseTransform());
-      // this.collider = {intersect_test: GameObject.intersect_sphere, points: new defs.Subdivision_Sphere(8), leeway: .5};
-      if (this.player.check_if_colliding(this.objects[i], this.collider)) {
-        console.log("Collision: collided", { i });
+      if (
+        this.rings[i].checkPlayerCollision(
+          playerX,
+          playerY,
+          playerZ,
+          lastPlayerX,
+          lastPlayerY,
+          lastPlayerZ
+        )
+      ) {
+        this.collidedRings++;
+        // console.log("Collision: collided", { i });
       } else {
         // console.log('Collision: not colliding');
       }
