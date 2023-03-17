@@ -5,7 +5,7 @@ import {
   Depth_Texture_Shader_2D,
   LIGHT_DEPTH_TEX_SIZE,
 } from "./examples/shadow-demo-shader.js";
-import { Ground, Player, Ring } from "./gameObject.js";
+import { GameObject, Ground, Player, Ring } from "./gameObject.js";
 
 const {
   Vector,
@@ -88,6 +88,9 @@ export class Game extends Scene {
       specularity: 0,
       texture: null,
     });
+
+    // this.collider = {intersect_test: GameObject.intersect_sphere, points: new defs.Subdivision_Sphere(8), leeway: .5};
+    this.collider = {intersect_test: GameObject.intersect_sphere, points: new defs.Subdivision_Sphere(4), leeway: 0};
   }
 
   left_vector() {
@@ -186,6 +189,7 @@ export class Game extends Scene {
   }
 
   reset() {
+    console.log('Reset game');
     this.playerPosition = vec3(0, INITIAL_HEIGHT, 5);
     this.playerVelocity = vec3(0, -0.5, 1);
     this.speed = INITIAL_SPEED;
@@ -343,6 +347,7 @@ export class Game extends Scene {
     }
 
     const dt = program_state.animation_delta_time / 1000;
+    this.update_state(dt)
 
     const v = this.playerVelocity.times(this.speed);
     // console.log(this.playerVelocity)
@@ -485,5 +490,30 @@ export class Game extends Scene {
     //   Mat4.scale(1, 0.5, 1000),
     //   this.materials.test.override({ color: hex_color("#FF00FF") })
     // );
+  }
+
+  update_state(dt, num_bodies = 40) {
+    if (this.paused) {
+      return;
+    }
+    // console.log('update_state',this.player.getBaseTransform());
+    // this.player.inverse = Mat4.inverse(this.player.drawn_location);
+    this.player.inverse = Mat4.inverse(this.player.getBaseTransform());
+    console.log(JSON.stringify(this.player.getBaseTransform()), 'player base');
+    // console.log(JSON.stringify(this.objects[2].getBaseTransform()), 'first ring base');
+    // console.log(JSON.stringify(this.objects[3].getBaseTransform()), '2nd  ring base');
+    // console.log(JSON.stringify(this.player.getBaseTransform()),'player base');
+    for (let i = 0; i < this.objects.length; i++) {
+      if (this.objects[i] instanceof Player) {
+        continue;
+      }
+      this.objects[i].inverse = Mat4.inverse(this.objects[i].getBaseTransform())
+      // this.collider = {intersect_test: GameObject.intersect_sphere, points: new defs.Subdivision_Sphere(8), leeway: .5};
+      if (this.player.check_if_colliding(this.objects[i], this.collider)) {
+        console.log('Collision: collided', { i });
+      } else {
+        // console.log('Collision: not colliding');
+      }
+    }
   }
 }
