@@ -5,7 +5,7 @@ import {
   Depth_Texture_Shader_2D,
   LIGHT_DEPTH_TEX_SIZE,
 } from "./examples/shadow-demo-shader.js";
-import { Ground, Player, Ring } from "./gameObject.js";
+import { FinishGround, FinishRing, Ground, Player, Ring } from "./gameObject.js";
 import { Text_Line } from "./examples/text-demo.js";
 
 const {
@@ -266,7 +266,9 @@ export class Game extends Scene {
     }
 
     this.ground = new Ground(Mat4.identity());
-    this.objects = [this.ground, this.player, ...this.rings];
+    this.finishGround = new FinishGround(Mat4.identity());
+    this.finishRing = new FinishRing(Mat4.identity());
+    this.objects = [this.ground, this.player, ...this.rings, this.finishGround, this.finishRing];
 
     this.flatten_up_press = false;
     this.dive_down_press = false;
