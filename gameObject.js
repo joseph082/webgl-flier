@@ -97,11 +97,12 @@ const shapes = {
   square: new defs.Square(),
   trapezoidalPrism: new defs.Capped_Cylinder(10, 10, Mat4.scale(3, 1, 1)),
   sphere: new defs.Subdivision_Sphere(8),
-  cone: new defs.Cone_Tip(10, 10),
+  cone_tip: new defs.Cone_Tip(10, 10),
   torus: new defs.Torus(16, 16),
   cube: new defs.Cube(),
   cone: new defs.Closed_Cone(10, 10),
   cylinder: new defs.Rounded_Capped_Cylinder(10, 10),
+  rounded_cone: new defs.Rounded_Closed_Cone(10, 10),
 };
 
 for (let i = 0; i < shapes.square.arrays.texture_coord.length; i++) {
@@ -341,8 +342,6 @@ export class Rock extends GameObject {
 export class Tree extends GameObject {
   constructor(baseTransform) {
     super(baseTransform);
-    this.rockRandomOffsetX = Math.random() * 205;
-    this.rockRandomScaling = Math.random() * 1.5 + 0.5;
   }
   draw(
     context,
@@ -379,10 +378,37 @@ export class Tree extends GameObject {
   }
 }
 
+export class Mountain extends GameObject {
+  constructor(baseTransform) {
+    super(baseTransform);
+  }
+  draw(
+      context,
+      program_state,
+      model_transform,
+      material_override,
+      light_depth_texture
+  ) {
+    const MOUNTAIN_HEIGHT = 400;
+    const MOUNTAIN_WIDTH = 200;
+    shapes.rounded_cone.draw(
+        context,
+        program_state,
+        model_transform
+            .times(this.getBaseTransform())
+            .times(invertedGroundRotation)
+            .times(Mat4.rotation(-Math.PI / 2, 1, 0, 0))
+            .times(Mat4.scale(MOUNTAIN_WIDTH, MOUNTAIN_WIDTH, MOUNTAIN_HEIGHT)),
+        material_override ?? snowTexture.override({ light_depth_texture })
+    );
+  }
+}
+
 export class Ground extends GameObject {
   constructor(baseTransform) {
     super(baseTransform);
 
+    // Generate trees
     for (let i = 0; i < 60; i++) {
       const x = Math.random() * 2000 - 1000;
       const y = Math.random() * 2000;
@@ -391,6 +417,8 @@ export class Ground extends GameObject {
         new Tree(Mat4.translation(x, y, z).times(Mat4.scale(2, 3, 2)))
       );
     }
+
+    // Generate rocks
     for (let i = 0; i < 40; i++) {
       const x = Math.random() * 2000 - 1000;
       const y = Math.random() * 2000;
@@ -398,6 +426,30 @@ export class Ground extends GameObject {
       this.children.push(
         new Rock(Mat4.translation(x, y, z).times(Mat4.scale(1.5, 1.5, 1.5)))
       );
+    }
+
+    // Generate mountains on the left
+    for (let i = 0; i < 35; i++) {
+      const x = -Math.random() * 400 - 350;
+      const y = Math.random() * 2000;
+      const z = -5;
+      this.children.push(new Mountain(Mat4.translation(x, y, z)));
+    }
+
+    // Generate mountains on the right
+    for (let i = 0; i < 35; i++) {
+      const x = Math.random() * 400 + 350;
+      const y = Math.random() * 2000;
+      const z = -5;
+      this.children.push(new Mountain(Mat4.translation(x, y, z)));
+    }
+
+    // Generate mountains in the center
+    for (let i = 0; i < 10; i++) {
+      const x = Math.random() * 500 - 250;
+      const y = Math.random() * 2000 + 100;
+      const z = -5;
+      this.children.push(new Mountain(Mat4.translation(x, y, z)));
     }
   }
 
@@ -414,7 +466,7 @@ export class Ground extends GameObject {
       model_transform
         .times(this.getBaseTransform())
         .times(groundRotation.times(Mat4.scale(3000, 3000, 1))),
-      material_override ?? snowTexture.override({ light_depth_texture })
+      material_override ?? snowTexture.override({color: hex_color("#808080")})
     );
 
     for (let tree of this.children) {
