@@ -27,20 +27,20 @@ const {
   Scene,
 } = tiny;
 
-const BANK_ANGLE = 0.015; // How sharp the turns are
+const BANK_ANGLE = 0.025; // How sharp the turns are
 const MAX_VERTICAL_ANGLE = -0.2; // Player will always be angled somewhat downward
 // const INITIAL_HEIGHT = 600;
 // const INITIAL_SPEED = 200;
 // const MAX_SPEED = 600;
 // const MIN_SPEED = 100;
 // const LATERAL_SPEED = 20;
-const INITIAL_HEIGHT = 80;
-const INITIAL_SPEED = 80;
-const MAX_SPEED = 140;
-const MIN_SPEED = 60;
+const INITIAL_HEIGHT = 120;
+const INITIAL_SPEED = 140;
+const MAX_SPEED = 200;
+const MIN_SPEED = 100;
 const LATERAL_SPEED = 10;
 const DIVE_ACCELERATION = 5;
-const FLATTEN_DECELERATION = 1;
+const FLATTEN_DECELERATION = 0.2;
 const CAM_DISTANCE = 0.1; // How far the camera is from the player
 
 export class Game extends Scene {
