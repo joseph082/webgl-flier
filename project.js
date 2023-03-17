@@ -264,6 +264,7 @@ export class Game extends Scene {
     this.player = new Player(Mat4.translation(...this.playerPosition));
     this.followCamera = true;
     this.dead = false;
+    this.won = false;
 
     this.rings = [];
 
@@ -597,10 +598,12 @@ export class Game extends Scene {
     } else if (this.dead) {
       outputString = `Died. Press escape to restart`;
       textDisplacement = Mat4.translation(-0.6, 0, -1);
-    } else if (this.playerPosition[2] >= 2500) {
-      outputString = `  Finished with score: ` + score.toString(); // three spaces to center text on screen
+    } else if (this.won || this.playerPosition[2] >= 2600) {
+      outputString =
+        `  Finished with score: ` + score.toString(10).padStart(4, "0"); // three spaces to center text on screen
       textDisplacement = Mat4.translation(-0.6, 0, -1);
       this.paused = true;
+      this.won = true;
     } else {
       outputString = `${scoreString}         Time: ${Math.floor(time)}`;
       textDisplacement = Mat4.translation(-0.6, 0.35, -1); // displace slightly in front of camera
@@ -612,16 +615,58 @@ export class Game extends Scene {
     const snowScale = 0.01;
 
     const snowDisplacements = [
-      Mat4.translation(Math.cos(this.playTime - 2 + this.snowDisplacementRandoms[0]) + this.snowDisplacementRandoms[0], (this.playTime % 1.9) * -1 + 1, -1),
-      Mat4.translation(Math.sin(1.1 * this.playTime - 1.5 + this.snowDisplacementRandoms[1]) + this.snowDisplacementRandoms[1], (this.playTime % (1.9 + this.snowDisplacementRandoms[1])) * -1 + 1, -1),
-      Mat4.translation(Math.cos(this.playTime - 1 + this.snowDisplacementRandoms[2]) + 0.1, (this.playTime % 2.3) * -1 + 1, -1),
-      Mat4.translation(Math.sin(0.9 * this.playTime - 0.5 + this.snowDisplacementRandoms[3]), (this.playTime % 2.3) * -1 + 1.1, -1),
-      Mat4.translation(Math.cos(this.playTime + this.snowDisplacementRandoms[4]), (this.playTime % 2) * -1 + 1, -1),
-      Mat4.translation(Math.sin(this.playTime + 0.5 + this.snowDisplacementRandoms[5]), (this.playTime % 2) * -1 + 0.9, -1),
-      Mat4.translation(Math.cos(this.playTime + 1 + this.snowDisplacementRandoms[6]), (this.playTime % 2.1) * -1 + 1.05, -1),
-      Mat4.translation(Math.sin(this.playTime + 1.5 + this.snowDisplacementRandoms[7]), (this.playTime % 2.1) * -1 + 1.06, -1),
-      Mat4.translation(Math.cos(this.playTime + 2 + this.snowDisplacementRandoms[8]), ((this.playTime + 1) % 2.2) * -1 + 1.1, -1),
-      Mat4.translation(Math.sin(this.playTime + 2.5 + this.snowDisplacementRandoms[9]), ((this.playTime + 1) % 2.2) * -1 + 1.5, -1),
+      Mat4.translation(
+        Math.cos(this.playTime - 2 + this.snowDisplacementRandoms[0]) +
+          this.snowDisplacementRandoms[0],
+        (this.playTime % 1.9) * -1 + 1,
+        -1
+      ),
+      Mat4.translation(
+        Math.sin(1.1 * this.playTime - 1.5 + this.snowDisplacementRandoms[1]) +
+          this.snowDisplacementRandoms[1],
+        (this.playTime % (1.9 + this.snowDisplacementRandoms[1])) * -1 + 1,
+        -1
+      ),
+      Mat4.translation(
+        Math.cos(this.playTime - 1 + this.snowDisplacementRandoms[2]) + 0.1,
+        (this.playTime % 2.3) * -1 + 1,
+        -1
+      ),
+      Mat4.translation(
+        Math.sin(0.9 * this.playTime - 0.5 + this.snowDisplacementRandoms[3]),
+        (this.playTime % 2.3) * -1 + 1.1,
+        -1
+      ),
+      Mat4.translation(
+        Math.cos(this.playTime + this.snowDisplacementRandoms[4]),
+        (this.playTime % 2) * -1 + 1,
+        -1
+      ),
+      Mat4.translation(
+        Math.sin(this.playTime + 0.5 + this.snowDisplacementRandoms[5]),
+        (this.playTime % 2) * -1 + 0.9,
+        -1
+      ),
+      Mat4.translation(
+        Math.cos(this.playTime + 1 + this.snowDisplacementRandoms[6]),
+        (this.playTime % 2.1) * -1 + 1.05,
+        -1
+      ),
+      Mat4.translation(
+        Math.sin(this.playTime + 1.5 + this.snowDisplacementRandoms[7]),
+        (this.playTime % 2.1) * -1 + 1.06,
+        -1
+      ),
+      Mat4.translation(
+        Math.cos(this.playTime + 2 + this.snowDisplacementRandoms[8]),
+        ((this.playTime + 1) % 2.2) * -1 + 1.1,
+        -1
+      ),
+      Mat4.translation(
+        Math.sin(this.playTime + 2.5 + this.snowDisplacementRandoms[9]),
+        ((this.playTime + 1) % 2.2) * -1 + 1.5,
+        -1
+      ),
     ];
 
     this.shapes.text.draw(
@@ -638,7 +683,9 @@ export class Game extends Scene {
         context,
         program_state,
         program_state.camera_transform.times(
-          snowDisplacements[i].times(Mat4.scale(snowScale, snowScale, snowScale))
+          snowDisplacements[i].times(
+            Mat4.scale(snowScale, snowScale, snowScale)
+          )
         ),
         this.materials.snow
       );
@@ -694,6 +741,22 @@ export class Game extends Scene {
       y: lastPlayerY,
       z: lastPlayerZ,
     } = this.player.getLastPosition();
+    if (
+      this.finishRing.checkPlayerCollision(
+        playerX,
+        playerY,
+        playerZ,
+        lastPlayerX,
+        lastPlayerY,
+        lastPlayerZ
+      )
+    ) {
+      this.won = true;
+      this.paused = true;
+      this.collidedRings += 2;
+      return;
+    }
+
     if (
       this.ground.checkPlayerCollision(
         playerX,
