@@ -528,15 +528,15 @@ export class Game extends Scene {
     // console.log('update_state',this.player.getBaseTransform());
     // this.player.inverse = Mat4.inverse(this.player.drawn_location);
     this.player.inverse = Mat4.inverse(this.player.getBaseTransform());
-    console.log(JSON.stringify(this.player.getBaseTransform()), 'player base');
+    // console.log(JSON.stringify(this.player.getBaseTransform()), 'player base');
     // console.log(JSON.stringify(this.objects[2].getBaseTransform()), 'first ring base');
     // console.log(JSON.stringify(this.objects[3].getBaseTransform()), '2nd  ring base');
     // console.log(JSON.stringify(this.player.getBaseTransform()),'player base');
-    for (let i = 0; i < this.objects.length; i++) {
-      if (this.objects[i] instanceof Player) {
+    for (let i = 0; i < this.rings.length; i++) {
+      if (this.rings[i] instanceof Player) {
         continue;
       }
-      this.objects[i].inverse = Mat4.inverse(this.objects[i].getBaseTransform())
+      this.rings[i].inverse = Mat4.inverse(this.rings[i].getBaseTransform())
       // this.collider = {intersect_test: GameObject.intersect_sphere, points: new defs.Subdivision_Sphere(8), leeway: .5};
       if (this.player.check_if_colliding(this.objects[i], this.collider)) {
         console.log('Collision: collided', { i });
