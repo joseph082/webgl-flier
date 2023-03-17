@@ -105,6 +105,9 @@ for (let i = 0; i < shapes.cone.arrays.texture_coord.length; i++) {
 //   shapes.trapezoidalPrism.arrays.texture_coord[i][1] /= 8;
 // }
 
+const MOUNTAIN_HEIGHT = 250;
+const MOUNTAIN_WIDTH = 150;
+
 const phong_material = new Material(new Shadow_Textured_Phong_Shader(1));
 const rockTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
   // color: hex_color("#7F8386"), // <-- changed base color to black
@@ -535,7 +538,7 @@ export class Ground extends GameObject {
     for (let i = 0; i < 35; i++) {
       const x = -Math.random() * 400 - 350;
       const y = Math.random() * 2000;
-      const z = -5;
+      const z = -MOUNTAIN_HEIGHT+100;
       this.children.push(new Mountain(Mat4.translation(x, y, z)));
     }
 
@@ -543,7 +546,7 @@ export class Ground extends GameObject {
     for (let i = 0; i < 35; i++) {
       const x = Math.random() * 400 + 350;
       const y = Math.random() * 2000;
-      const z = -5;
+      const z = -MOUNTAIN_HEIGHT+100;
       this.children.push(new Mountain(Mat4.translation(x, y, z)));
     }
 
@@ -551,7 +554,7 @@ export class Ground extends GameObject {
     for (let i = 0; i < 10; i++) {
       const x = Math.random() * 500 - 250;
       const y = Math.random() * 2000 + 500;
-      const z = -5;
+      const z = -MOUNTAIN_HEIGHT+100;
       this.children.push(new Mountain(Mat4.translation(x, y, z)));
     }
   }
