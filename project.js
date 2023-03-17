@@ -58,6 +58,7 @@ export class Game extends Scene {
       text: new Text_Line(105),
     };
 
+    this.firstPause = true;
     this.reset();
 
     this.pure = new Material(new Color_Phong_Shader(), {});
@@ -229,7 +230,7 @@ export class Game extends Scene {
     this.key_triggered_button(
       "Pause",
       [" "],
-      () => (this.paused = !this.paused)
+      () => { this.paused = !this.paused; this.firstPause = false; }
     );
     this.key_triggered_button("Reset", ["Escape"], () => this.reset());
     this.new_line();
@@ -276,6 +277,7 @@ export class Game extends Scene {
     this.lateral_right_press = false;
 
     this.lateral_value = 0;
+    this.firstPause = true;
     this.paused = true;
 
     const phong = new defs.Phong_Shader();
@@ -555,12 +557,21 @@ export class Game extends Scene {
     const time = Math.floor(this.playTime);
     const score = this.collidedRings * 50;
     const scoreString = `Score:${score.toString(10).padStart(4, "0")}`;
-    const outputString = `${scoreString}         Time: ${Math.floor(time)}`;
+    let outputString;
+    let textDisplacement;
+    if (this.firstPause) {
+      outputString = `  Press spacebar to begin`; // three spaces to center text on screen
+      textDisplacement = Mat4.translation(-0.6, 0, -1);
+    }
+    else {
+      outputString = `${scoreString}         Time: ${Math.floor(time)}`;
+      textDisplacement = Mat4.translation(-0.6, 0.35, -1); // displace slightly in front of camera
+    }
 
     this.shapes.text.set_string(outputString, context.context);
 
     const textScale = 0.03;
-    const textDisplacement = Mat4.translation(-0.6, 0.35, -1); // displace slightly in front of camera
+
     this.shapes.text.draw(
       context,
       program_state,
