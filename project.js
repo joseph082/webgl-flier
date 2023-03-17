@@ -259,7 +259,7 @@ export class Game extends Scene {
       const z = 200 + 220 * i;
       const y = -z * Math.sin(Math.PI / 6) + 50 - 20 * Math.random() - 10 * i;
       this.rings.push(
-        new Ring(Mat4.translation(x, y, z).times(Mat4.scale(15, 15, 15)))
+        new Ring(Mat4.translation(x, y, z).times(Mat4.scale(25, 25, 25)))
       );
     }
 
@@ -630,7 +630,7 @@ export class Game extends Scene {
         )
       ) {
         this.collidedRings++;
-        console.log("Collision: collided", { i });
+        // console.log("Collision: collided", { i });
       } else {
         // console.log('Collision: not colliding');
       }

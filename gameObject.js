@@ -233,19 +233,19 @@ export class Player extends GameObject {
         })
     );
     // // bottom cone
-    // shapes.cone.draw(
-    //   context,
-    //   program_state,
-    //   model_transform
-    //     .times(this.getBaseTransform())
-    //     .times(Mat4.translation(0, -2, 0))
-    //     .times(Mat4.rotation(0, 0, 1, 0))
-    //     .times(Mat4.scale(5, 2, 6)),
-    //   material_override ??
-    //   playerTexutre.override({
-    //     light_depth_texture,
-    //   })
-    // );
+    shapes.cone.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.getBaseTransform())
+        .times(Mat4.translation(0, 0, 5))
+        .times(Mat4.rotation(Math.PI, 0, 1, 0))
+        .times(Mat4.scale(4, 2, 4)),
+      material_override ??
+        playerTexutre.override({
+          light_depth_texture,
+        })
+    );
   }
 }
 export class Ring extends GameObject {
@@ -376,6 +376,8 @@ export class Tree extends GameObject {
     super(baseTransform);
     this.rockRandomOffsetX = Math.random() * 205;
     this.rockRandomScaling = Math.random() * 1.5 + 0.5;
+
+    this.randomOffset = Math.random() * Math.PI;
   }
   draw(
     context,
@@ -421,7 +423,7 @@ export class Ground extends GameObject {
       const y = Math.random() * 2000;
       const z = -5;
       this.children.push(
-        new Tree(Mat4.translation(x, y, z).times(Mat4.scale(2, 3, 2)))
+        new Tree(Mat4.translation(x, y, z).times(Mat4.scale(2.5, 5, 2.5)))
       );
     }
     for (let i = 0; i < 40; i++) {
@@ -429,7 +431,7 @@ export class Ground extends GameObject {
       const y = Math.random() * 2000;
       const z = -5;
       this.children.push(
-        new Rock(Mat4.translation(x, y, z).times(Mat4.scale(1.5, 1.5, 1.5)))
+        new Rock(Mat4.translation(x, y, z).times(Mat4.scale(2.5, 2.5, 2.5)))
       );
     }
   }
@@ -451,10 +453,14 @@ export class Ground extends GameObject {
     );
 
     for (let tree of this.children) {
+      const transform = model_transform
+        .times(this.getBaseTransform())
+        .times(groundRotation);
+
       tree.draw(
         context,
         program_state,
-        model_transform.times(this.getBaseTransform()).times(groundRotation),
+        transform,
         material_override,
         light_depth_texture
       );
