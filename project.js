@@ -227,11 +227,10 @@ export class Game extends Scene {
       () => (this.lateral_right_press = false)
     );
     this.new_line();
-    this.key_triggered_button(
-      "Pause",
-      [" "],
-      () => { this.paused = !this.paused; this.firstPause = false; }
-    );
+    this.key_triggered_button("Pause", [" "], () => {
+      this.paused = !this.paused;
+      this.firstPause = false;
+    });
     this.key_triggered_button("Reset", ["Escape"], () => this.reset());
     this.new_line();
     this.key_triggered_button(
@@ -562,8 +561,7 @@ export class Game extends Scene {
     if (this.firstPause) {
       outputString = `  Press spacebar to begin`; // three spaces to center text on screen
       textDisplacement = Mat4.translation(-0.6, 0, -1);
-    }
-    else {
+    } else {
       outputString = `${scoreString}         Time: ${Math.floor(time)}`;
       textDisplacement = Mat4.translation(-0.6, 0.35, -1); // displace slightly in front of camera
     }
@@ -631,6 +629,24 @@ export class Game extends Scene {
       y: lastPlayerY,
       z: lastPlayerZ,
     } = this.player.getLastPosition();
+    for (let i = 0; i < this.ground.children.length; i++) {
+      if (i === 0 || true)
+        if (
+          this.ground.children[i].checkPlayerCollision(
+            playerX,
+            playerY,
+            playerZ,
+            lastPlayerX,
+            lastPlayerY,
+            lastPlayerZ
+          )
+        ) {
+          console.log("collided with deadly force");
+          this.paused = true;
+          return;
+        }
+      // console.log(i);
+    }
     for (let i = 0; i < this.rings.length; i++) {
       if (
         !this.ringsHit[i] &&
