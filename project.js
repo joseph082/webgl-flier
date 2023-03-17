@@ -6,6 +6,7 @@ import {
   LIGHT_DEPTH_TEX_SIZE,
 } from "./examples/shadow-demo-shader.js";
 import { GameObject, Ground, Player, Ring } from "./gameObject.js";
+import { Text_Line } from "./examples/text-demo.js";
 
 const {
   Vector,
@@ -21,6 +22,7 @@ const {
   Mat4,
   Light,
   Shape,
+  Texture,
   Material,
   Scene,
 } = tiny;
@@ -52,6 +54,8 @@ export class Game extends Scene {
       rect: new defs.Square(),
       torus: new defs.Torus(15, 15),
       square_2d: new defs.Square(),
+      cube: new defs.Cube(),
+      text: new Text_Line(105),
     };
 
     this.reset();
@@ -276,6 +280,18 @@ export class Game extends Scene {
 
     this.lateral_value = 0;
     this.paused = true;
+
+
+    const phong = new defs.Phong_Shader();
+    const texture = new defs.Textured_Phong(1);
+    this.grey = new Material(phong, {
+      color: color(.5, .5, .5, 1), ambient: 0,
+      diffusivity: .3, specularity: .5, smoothness: 10
+    })
+    this.text_image = new Material(texture, {
+      ambient: 1, diffusivity: 0, specularity: 0,
+      texture: new Texture("assets/text.png")
+    });
   }
 
   // NOTE: this function is copied from examples/shadow-demo.js
@@ -532,6 +548,40 @@ export class Game extends Scene {
       0.1,
       2000
     );
+
+    const t = program_state.animation_time / 1000;
+    const funny_orbit = Mat4.rotation(Math.PI / 4 * t, Math.cos(t), Math.sin(t), .7 * Math.cos(t));
+
+
+    this.shapes.cube.draw(context, program_state, funny_orbit, this.grey);
+
+    const score = Math.floor(t);
+    const time = t;
+    const scoreString = `Score:${score.toString(10).padStart(4, '0')}`;
+    const outputString = [`${scoreString}         Time: ${Math.floor(time)}`];
+
+    // Sample the "strings" array and draw them onto a cube.
+
+
+    const multi_line_string = outputString[0].split('\n');
+    // Draw a Text_String for every line in our string, up to 30 lines:
+    for (const line of outputString) {             // Assign the string to Text_String, and then draw it.
+      this.shapes.text.set_string(line, context.context);
+      // this.shapes.text.draw(context, program_state, funny_orbit.times(cube_side)
+      //   .times(Mat4.scale(.03, .03, .03)), this.text_image);
+
+      // this.shapes.text.draw(context, program_state, Mat4.translation(-0.99, 0.08, 0).times(
+      //   Mat4.scale(0.5, (0.5 * gl.canvas.width) / gl.canvas.height, 1)
+      // ), this.text_image);
+
+      const textScale = 0.03;
+      this.shapes.text.draw(context, program_state,
+        program_state.camera_transform.times(Mat4.translation(-60 / 100, 35 / 100, -1).times(Mat4.scale(textScale, textScale, textScale))), this.text_image);
+
+      // Move our basis down a line.
+
+    }
+
 
     program_state.view_mat = program_state.camera_inverse;
     this.render_scene(context, program_state, true);
