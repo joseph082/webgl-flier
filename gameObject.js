@@ -509,6 +509,17 @@ export class Mountain extends GameObject {
 }
 
 export class Ground extends GameObject {
+  checkPlayerCollision(playerX, playerY, playerZ) {
+    const normal = vec4(0, Math.cos(Math.PI / 6), Math.sin(Math.PI / 6), 0);
+    const distance = normal.dot(
+      vec4(playerX, playerY, playerZ, 0).minus(
+        vec4(0, -Math.sin(Math.PI / 6), Math.cos(Math.PI / 6), 0)
+      )
+    );
+
+    return distance < 4.0;
+  }
+
   constructor(baseTransform) {
     super(baseTransform);
 
@@ -536,7 +547,7 @@ export class Ground extends GameObject {
     for (let i = 0; i < 35; i++) {
       const x = -Math.random() * 400 - 350;
       const y = Math.random() * 2000;
-      const z = -MOUNTAIN_HEIGHT+100;
+      const z = -MOUNTAIN_HEIGHT + 100;
       this.children.push(new Mountain(Mat4.translation(x, y, z)));
     }
 
@@ -544,7 +555,7 @@ export class Ground extends GameObject {
     for (let i = 0; i < 35; i++) {
       const x = Math.random() * 400 + 350;
       const y = Math.random() * 2000;
-      const z = -MOUNTAIN_HEIGHT+100;
+      const z = -MOUNTAIN_HEIGHT + 100;
       this.children.push(new Mountain(Mat4.translation(x, y, z)));
     }
 
@@ -552,7 +563,7 @@ export class Ground extends GameObject {
     for (let i = 0; i < 10; i++) {
       const x = Math.random() * 500 - 250;
       const y = Math.random() * 2000 + 500;
-      const z = -MOUNTAIN_HEIGHT+100;
+      const z = -MOUNTAIN_HEIGHT + 100;
       this.children.push(new Mountain(Mat4.translation(x, y, z)));
     }
   }
@@ -650,7 +661,8 @@ export class FinishGround extends GameObject {
       program_state,
       model_transform
         // .times(this.getBaseTransform())
-        .times(Mat4.scale(3000, 3000, 1000)).times(Mat4.translation(0, -400, 0)),
+        .times(Mat4.scale(3000, 3000, 1000))
+        .times(Mat4.translation(0, -400, 0)),
       material_override ?? snowTexture.override({ color: hex_color("#808080") })
     );
 
@@ -728,14 +740,17 @@ export class FinishRing extends GameObject {
     shapes.torus.draw(
       context,
       program_state,
-      model_transform.times(this.baseTransform).times(Mat4.translation(0, -1100, 2500)).times(Mat4.scale(250, 250, 250)),
+      model_transform
+        .times(this.baseTransform)
+        .times(Mat4.translation(0, -1100, 2500))
+        .times(Mat4.scale(250, 250, 250)),
       material_override ??
-      phong_material.override({
-        ambient: 0.4,
-        diffusivity: 0.6,
-        color: hex_color("#FF0000"),
-        light_depth_texture,
-      })
+        phong_material.override({
+          ambient: 0.4,
+          diffusivity: 0.6,
+          color: hex_color("#FF0000"),
+          light_depth_texture,
+        })
     );
   }
 }
