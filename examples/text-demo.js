@@ -1,16 +1,16 @@
-import {defs, tiny} from './common.js';
+import { defs, tiny } from './common.js';
 // Pull these names into this module's scope for convenience:
-const {Vector, vec3, vec4, color, Mat4, Light, Shape, Material, Shader, Texture, Scene} = tiny;
+const { Vector, vec3, vec4, color, Mat4, Light, Shape, Material, Shader, Texture, Scene } = tiny;
 
 export class Text_Line extends Shape {                           // **Text_Line** embeds text in the 3D world, using a crude texture
-                                                                 // method.  This Shape is made of a horizontal arrangement of quads.
-                                                                 // Each is textured over with images of ASCII characters, spelling
-                                                                 // out a string.  Usage:  Instantiate the Shape with the desired
-                                                                 // character line width.  Then assign it a single-line string by calling
-                                                                 // set_string("your string") on it. Draw the shape on a material
-                                                                 // with full ambient weight, and text.png assigned as its texture
-                                                                 // file.  For multi-line strings, repeat this process and draw with
-                                                                 // a different matrix.
+    // method.  This Shape is made of a horizontal arrangement of quads.
+    // Each is textured over with images of ASCII characters, spelling
+    // out a string.  Usage:  Instantiate the Shape with the desired
+    // character line width.  Then assign it a single-line string by calling
+    // set_string("your string") on it. Draw the shape on a material
+    // with full ambient weight, and text.png assigned as its texture
+    // file.  For multi-line strings, repeat this process and draw with
+    // a different matrix.
     constructor(max_size) {
         super("position", "normal", "texture_coord");
         this.max_size = max_size;
@@ -48,9 +48,9 @@ export class Text_Line extends Shape {                           // **Text_Line*
 export class Text_Demo extends Scene {             // **Text_Demo** is a scene with a cube, for demonstrating the Text_Line utility Shape.
     constructor() {
         super()
-        this.shapes = {cube: new defs.Cube(), text: new Text_Line(35)};
+        this.shapes = { cube: new defs.Cube(), text: new Text_Line(35) };
         // Don't create any DOM elements to control this scene:
-        this.widget_options = {make_controls: false};
+        this.widget_options = { make_controls: false };
 
         const phong = new defs.Phong_Shader();
         const texture = new defs.Textured_Phong(1);
@@ -68,7 +68,7 @@ export class Text_Demo extends Scene {             // **Text_Demo** is a scene w
 
     display(context, program_state) {
         program_state.lights = [new Light(vec4(3, 2, 1, 0), color(1, 1, 1, 1), 1000000),
-            new Light(vec4(3, 10, 10, 1), color(1, .7, .7, 1), 100000)];
+        new Light(vec4(3, 10, 10, 1), color(1, .7, .7, 1), 100000)];
         program_state.set_camera(Mat4.look_at(...Vector.cast([0, 0, 4], [0, 0, 0], [0, 1, 0])));
         program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 1, 500);
 
@@ -81,7 +81,7 @@ export class Text_Demo extends Scene {             // **Text_Demo** is a scene w
             Text_Line.toString(), Text_Line.toString()];
 
         // Sample the "strings" array and draw them onto a cube.
-        for (let i = 0; i < 3; i++)
+        for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 2; j++) {             // Find the matrix for a basis located along one of the cube's sides:
                 let cube_side = Mat4.rotation(i == 0 ? Math.PI / 2 : 0, 1, 0, 0)
                     .times(Mat4.rotation(Math.PI * j - (i == 1 ? Math.PI / 2 : 0), 0, 1, 0))
@@ -97,5 +97,6 @@ export class Text_Demo extends Scene {             // **Text_Demo** is a scene w
                     cube_side.post_multiply(Mat4.translation(0, -.06, 0));
                 }
             }
+        }
     }
 }
