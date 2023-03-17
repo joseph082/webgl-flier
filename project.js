@@ -5,7 +5,13 @@ import {
   Depth_Texture_Shader_2D,
   LIGHT_DEPTH_TEX_SIZE,
 } from "./examples/shadow-demo-shader.js";
-import { FinishGround, FinishRing, Ground, Player, Ring } from "./gameObject.js";
+import {
+  FinishGround,
+  FinishRing,
+  Ground,
+  Player,
+  Ring,
+} from "./gameObject.js";
 import { Text_Line } from "./examples/text-demo.js";
 
 const {
@@ -55,6 +61,7 @@ export class Game extends Scene {
       torus: new defs.Torus(15, 15),
       square_2d: new defs.Square(),
       cube: new defs.Cube(),
+      snowflake: new defs.Regular_2D_Polygon(8, 8),
       text: new Text_Line(105),
     };
 
@@ -77,6 +84,12 @@ export class Game extends Scene {
       test: new Material(new defs.Phong_Shader(), {
         ambient: 0.4,
         diffusivity: 0.6,
+        color: hex_color("#ffffff"),
+      }),
+      snow: new Material(new defs.Phong_Shader(), {
+        ambient: 0.9,
+        diffusivity: 0,
+        specularity: 0,
         color: hex_color("#ffffff"),
       }),
     };
@@ -250,9 +263,22 @@ export class Game extends Scene {
     this.playerAcceleration = vec3(0, 0, 0);
     this.player = new Player(Mat4.translation(...this.playerPosition));
     this.followCamera = true;
+    this.dead = false;
 
     this.rings = [];
-    this.ringsHit = [];
+
+    this.snowDisplacementRandoms = [
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      Math.random(),
+    ];
 
     // Generate rings.
     for (let i = 0; i < 10; i++) {
@@ -262,13 +288,18 @@ export class Game extends Scene {
       this.rings.push(
         new Ring(Mat4.translation(x, y, z).times(Mat4.scale(25, 25, 25)))
       );
-      this.ringsHit.push(false);
     }
 
     this.ground = new Ground(Mat4.identity());
     this.finishGround = new FinishGround(Mat4.identity());
     this.finishRing = new FinishRing(Mat4.identity());
-    this.objects = [this.ground, this.player, ...this.rings, this.finishGround, this.finishRing];
+    this.objects = [
+      this.ground,
+      this.player,
+      ...this.rings,
+      this.finishGround,
+      this.finishRing,
+    ];
 
     this.flatten_up_press = false;
     this.dive_down_press = false;
@@ -563,6 +594,9 @@ export class Game extends Scene {
     if (this.firstPause) {
       outputString = `  Press spacebar to begin`; // three spaces to center text on screen
       textDisplacement = Mat4.translation(-0.6, 0, -1);
+    } else if (this.dead) {
+      outputString = `Died. Press escape to restart`;
+      textDisplacement = Mat4.translation(-0.6, 0, -1);
     } else if (this.playerPosition[2] >= 2500) {
       outputString = `  Finished with score: ` + score.toString(); // three spaces to center text on screen
       textDisplacement = Mat4.translation(-0.6, 0, -1);
@@ -575,6 +609,20 @@ export class Game extends Scene {
     this.shapes.text.set_string(outputString, context.context);
 
     const textScale = 0.03;
+    const snowScale = 0.01;
+
+    const snowDisplacements = [
+      Mat4.translation(Math.cos(this.playTime - 2 + this.snowDisplacementRandoms[0]) + this.snowDisplacementRandoms[0], (this.playTime % 1.9) * -1 + 1, -1),
+      Mat4.translation(Math.sin(1.1 * this.playTime - 1.5 + this.snowDisplacementRandoms[1]) + this.snowDisplacementRandoms[1], (this.playTime % (1.9 + this.snowDisplacementRandoms[1])) * -1 + 1, -1),
+      Mat4.translation(Math.cos(this.playTime - 1 + this.snowDisplacementRandoms[2]) + 0.1, (this.playTime % 2.3) * -1 + 1, -1),
+      Mat4.translation(Math.sin(0.9 * this.playTime - 0.5 + this.snowDisplacementRandoms[3]), (this.playTime % 2.3) * -1 + 1.1, -1),
+      Mat4.translation(Math.cos(this.playTime + this.snowDisplacementRandoms[4]), (this.playTime % 2) * -1 + 1, -1),
+      Mat4.translation(Math.sin(this.playTime + 0.5 + this.snowDisplacementRandoms[5]), (this.playTime % 2) * -1 + 0.9, -1),
+      Mat4.translation(Math.cos(this.playTime + 1 + this.snowDisplacementRandoms[6]), (this.playTime % 2.1) * -1 + 1.05, -1),
+      Mat4.translation(Math.sin(this.playTime + 1.5 + this.snowDisplacementRandoms[7]), (this.playTime % 2.1) * -1 + 1.06, -1),
+      Mat4.translation(Math.cos(this.playTime + 2 + this.snowDisplacementRandoms[8]), ((this.playTime + 1) % 2.2) * -1 + 1.1, -1),
+      Mat4.translation(Math.sin(this.playTime + 2.5 + this.snowDisplacementRandoms[9]), ((this.playTime + 1) % 2.2) * -1 + 1.5, -1),
+    ];
 
     this.shapes.text.draw(
       context,
@@ -584,6 +632,17 @@ export class Game extends Scene {
       ),
       this.text_image
     );
+
+    for (let i = 0; i < snowDisplacements.length; i++) {
+      this.shapes.snowflake.draw(
+        context,
+        program_state,
+        program_state.camera_transform.times(
+          snowDisplacements[i].times(Mat4.scale(snowScale, snowScale, snowScale))
+        ),
+        this.materials.snow
+      );
+    }
 
     program_state.view_mat = program_state.camera_inverse;
     this.render_scene(context, program_state, true);
@@ -635,6 +694,22 @@ export class Game extends Scene {
       y: lastPlayerY,
       z: lastPlayerZ,
     } = this.player.getLastPosition();
+    if (
+      this.ground.checkPlayerCollision(
+        playerX,
+        playerY,
+        playerZ,
+        lastPlayerX,
+        lastPlayerY,
+        lastPlayerZ
+      )
+    ) {
+      console.log("collided with deadly force");
+      this.dead = true;
+      this.paused = true;
+      return;
+    }
+
     for (let i = 0; i < this.ground.children.length; i++) {
       if (i === 0 || true)
         if (
@@ -648,6 +723,7 @@ export class Game extends Scene {
           )
         ) {
           console.log("collided with deadly force");
+          this.dead = true;
           this.paused = true;
           return;
         }
@@ -655,7 +731,7 @@ export class Game extends Scene {
     }
     for (let i = 0; i < this.rings.length; i++) {
       if (
-        !this.ringsHit[i] &&
+        // !this.ringsHit[i] &&
         this.rings[i].checkPlayerCollision(
           playerX,
           playerY,
@@ -666,7 +742,6 @@ export class Game extends Scene {
         )
       ) {
         this.collidedRings++;
-        this.ringsHit[i] = true;
         // console.log("Collision: collided", { i });
       } else {
         // console.log('Collision: not colliding');

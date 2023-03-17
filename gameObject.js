@@ -430,8 +430,6 @@ export class Tree extends GameObject {
       return true;
     }
     return false;
-
-    this.randomOffset = Math.random() * Math.PI;
   }
 
   draw(
@@ -484,7 +482,51 @@ export class Mountain extends GameObject {
   constructor(baseTransform) {
     super(baseTransform);
   }
-  checkPlayerCollision() {
+
+  checkPlayerCollision(
+    playerX,
+    playerY,
+    playerZ,
+    lastPlayerX,
+    lastPlayerY,
+    lastPlayerZ
+  ) {
+    // const MOUNTAIN_HEIGHT = 400;
+    // const MOUNTAIN_WIDTH = 200;
+    const mountainCoords = groundRotation
+      .times(this.baseTransform)
+      .times(invertedGroundRotation)
+      .times(Mat4.rotation(-Math.PI / 2, 1, 0, 0))
+      .times(Mat4.scale(MOUNTAIN_WIDTH, MOUNTAIN_WIDTH, MOUNTAIN_HEIGHT));
+    const mountainX = mountainCoords[0][3],
+      mountainY = mountainCoords[1][3],
+      mountainZ = mountainCoords[2][3];
+    const collisionRadius = 150 && MOUNTAIN_WIDTH;
+    if (
+      playerY > mountainY + 250 * 2 ||
+      playerY <= mountainY - 250 ||
+      Math.abs(playerX - mountainX) > collisionRadius ||
+      Math.abs(playerZ - mountainZ) > collisionRadius
+    ) {
+      return false;
+    }
+    const dy = mountainY + MOUNTAIN_HEIGHT - playerY;
+    const circleRadius = (MOUNTAIN_WIDTH / 2 / MOUNTAIN_HEIGHT) * dy;
+    // console.log({
+    //   dist: Math.sqrt((playerX - treeX) ** 2 + (playerZ - treeZ) ** 2),
+    //   circleRadius,
+    //   dL: circleRadius + 6,
+    // });
+    if (
+      Math.sqrt((playerX - mountainX) ** 2 + (playerZ - mountainZ) ** 2) <
+      circleRadius + 4
+    ) {
+      // console.log("collided with tree", {
+      //   dist: Math.sqrt((playerX - treeX) ** 2 + (playerZ - treeZ) ** 2),
+      //   dy,
+      // });
+      return true;
+    }
     return false;
   }
 
@@ -509,6 +551,17 @@ export class Mountain extends GameObject {
 }
 
 export class Ground extends GameObject {
+  checkPlayerCollision(playerX, playerY, playerZ) {
+    const normal = vec4(0, Math.cos(Math.PI / 6), Math.sin(Math.PI / 6), 0);
+    const distance = normal.dot(
+      vec4(playerX, playerY, playerZ, 0).minus(
+        vec4(0, -Math.sin(Math.PI / 6), Math.cos(Math.PI / 6), 0)
+      )
+    );
+
+    return distance < 4.0;
+  }
+
   constructor(baseTransform) {
     super(baseTransform);
 
@@ -536,7 +589,7 @@ export class Ground extends GameObject {
     for (let i = 0; i < 35; i++) {
       const x = -Math.random() * 400 - 350;
       const y = Math.random() * 2000;
-      const z = -MOUNTAIN_HEIGHT+100;
+      const z = -MOUNTAIN_HEIGHT + 100;
       this.children.push(new Mountain(Mat4.translation(x, y, z)));
     }
 
@@ -544,7 +597,7 @@ export class Ground extends GameObject {
     for (let i = 0; i < 35; i++) {
       const x = Math.random() * 400 + 350;
       const y = Math.random() * 2000;
-      const z = -MOUNTAIN_HEIGHT+100;
+      const z = -MOUNTAIN_HEIGHT + 100;
       this.children.push(new Mountain(Mat4.translation(x, y, z)));
     }
 
@@ -552,7 +605,7 @@ export class Ground extends GameObject {
     for (let i = 0; i < 10; i++) {
       const x = Math.random() * 500 - 250;
       const y = Math.random() * 2000 + 500;
-      const z = -MOUNTAIN_HEIGHT+100;
+      const z = -MOUNTAIN_HEIGHT + 100;
       this.children.push(new Mountain(Mat4.translation(x, y, z)));
     }
   }
@@ -684,12 +737,12 @@ export class FinishRing extends GameObject {
       program_state,
       model_transform.times(this.baseTransform).times(Mat4.translation(0, -1200, 2500)).times(Mat4.scale(250, 250, 250)),
       material_override ??
-      phong_material.override({
-        ambient: 0.4,
-        diffusivity: 0.6,
-        color: hex_color("#FF0000"),
-        light_depth_texture,
-      })
+        phong_material.override({
+          ambient: 0.4,
+          diffusivity: 0.6,
+          color: hex_color("#FF0000"),
+          light_depth_texture,
+        })
     );
   }
 }
