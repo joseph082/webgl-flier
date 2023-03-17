@@ -263,9 +263,9 @@ export class Game extends Scene {
     this.playerAcceleration = vec3(0, 0, 0);
     this.player = new Player(Mat4.translation(...this.playerPosition));
     this.followCamera = true;
+    this.dead = false;
 
     this.rings = [];
-    this.ringsHit = [];
 
     this.snowDisplacementRandoms = [
       Math.random(),
@@ -288,7 +288,6 @@ export class Game extends Scene {
       this.rings.push(
         new Ring(Mat4.translation(x, y, z).times(Mat4.scale(25, 25, 25)))
       );
-      this.ringsHit.push(false);
     }
 
     this.ground = new Ground(Mat4.identity());
@@ -595,6 +594,9 @@ export class Game extends Scene {
     if (this.firstPause) {
       outputString = `  Press spacebar to begin`; // three spaces to center text on screen
       textDisplacement = Mat4.translation(-0.6, 0, -1);
+    } else if (this.dead) {
+      outputString = `Died. Press escape to restart`;
+      textDisplacement = Mat4.translation(-0.6, 0, -1);
     } else {
       outputString = `${scoreString}         Time: ${Math.floor(time)}`;
       textDisplacement = Mat4.translation(-0.6, 0.35, -1); // displace slightly in front of camera
@@ -699,6 +701,7 @@ export class Game extends Scene {
       )
     ) {
       console.log("collided with deadly force");
+      this.dead = true;
       this.paused = true;
       return;
     }
@@ -716,6 +719,7 @@ export class Game extends Scene {
           )
         ) {
           console.log("collided with deadly force");
+          this.dead = true;
           this.paused = true;
           return;
         }
@@ -723,7 +727,7 @@ export class Game extends Scene {
     }
     for (let i = 0; i < this.rings.length; i++) {
       if (
-        !this.ringsHit[i] &&
+        // !this.ringsHit[i] &&
         this.rings[i].checkPlayerCollision(
           playerX,
           playerY,
@@ -734,7 +738,6 @@ export class Game extends Scene {
         )
       ) {
         this.collidedRings++;
-        this.ringsHit[i] = true;
         // console.log("Collision: collided", { i });
       } else {
         // console.log('Collision: not colliding');
