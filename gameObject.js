@@ -430,8 +430,6 @@ export class Tree extends GameObject {
       return true;
     }
     return false;
-
-    this.randomOffset = Math.random() * Math.PI;
   }
 
   draw(
@@ -484,7 +482,51 @@ export class Mountain extends GameObject {
   constructor(baseTransform) {
     super(baseTransform);
   }
-  checkPlayerCollision() {
+
+  checkPlayerCollision(
+    playerX,
+    playerY,
+    playerZ,
+    lastPlayerX,
+    lastPlayerY,
+    lastPlayerZ
+  ) {
+    // const MOUNTAIN_HEIGHT = 400;
+    // const MOUNTAIN_WIDTH = 200;
+    const mountainCoords = groundRotation
+      .times(this.baseTransform)
+      .times(invertedGroundRotation)
+      .times(Mat4.rotation(-Math.PI / 2, 1, 0, 0))
+      .times(Mat4.scale(MOUNTAIN_WIDTH, MOUNTAIN_WIDTH, MOUNTAIN_HEIGHT));
+    const mountainX = mountainCoords[0][3],
+      mountainY = mountainCoords[1][3],
+      mountainZ = mountainCoords[2][3];
+    const collisionRadius = 150 && MOUNTAIN_WIDTH;
+    if (
+      playerY > mountainY + 250 * 2 ||
+      playerY <= mountainY - 250 ||
+      Math.abs(playerX - mountainX) > collisionRadius ||
+      Math.abs(playerZ - mountainZ) > collisionRadius
+    ) {
+      return false;
+    }
+    const dy = mountainY + MOUNTAIN_HEIGHT - playerY;
+    const circleRadius = (MOUNTAIN_WIDTH / 2 / MOUNTAIN_HEIGHT) * dy;
+    // console.log({
+    //   dist: Math.sqrt((playerX - treeX) ** 2 + (playerZ - treeZ) ** 2),
+    //   circleRadius,
+    //   dL: circleRadius + 6,
+    // });
+    if (
+      Math.sqrt((playerX - mountainX) ** 2 + (playerZ - mountainZ) ** 2) <
+      circleRadius + 4
+    ) {
+      // console.log("collided with tree", {
+      //   dist: Math.sqrt((playerX - treeX) ** 2 + (playerZ - treeZ) ** 2),
+      //   dy,
+      // });
+      return true;
+    }
     return false;
   }
 
