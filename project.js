@@ -678,7 +678,7 @@ export class Game extends Scene {
             Mat4.scale(snowScale, snowScale, snowScale)
           )
         ),
-        this.materials.snow
+        this.materials.snow.override({ specularity: 0.5 })
       );
     }
 
