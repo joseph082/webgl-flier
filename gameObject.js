@@ -495,8 +495,6 @@ export class Mountain extends GameObject {
     material_override,
     light_depth_texture
   ) {
-    const MOUNTAIN_HEIGHT = 400;
-    const MOUNTAIN_WIDTH = 200;
     shapes.rounded_cone.draw(
       context,
       program_state,
