@@ -252,6 +252,7 @@ export class Game extends Scene {
     this.followCamera = true;
 
     this.rings = [];
+    this.ringsHit = [];
 
     // Generate rings.
     for (let i = 0; i < 10; i++) {
@@ -261,6 +262,7 @@ export class Game extends Scene {
       this.rings.push(
         new Ring(Mat4.translation(x, y, z).times(Mat4.scale(25, 25, 25)))
       );
+      this.ringsHit.push(false);
     }
 
     this.ground = new Ground(Mat4.identity());
@@ -551,7 +553,7 @@ export class Game extends Scene {
     );
 
     const time = Math.floor(this.playTime);
-    const score = time + this.collidedRings * 2;
+    const score = this.collidedRings * 50;
     const scoreString = `Score:${score.toString(10).padStart(4, "0")}`;
     const outputString = `${scoreString}         Time: ${Math.floor(time)}`;
 
@@ -620,6 +622,7 @@ export class Game extends Scene {
     } = this.player.getLastPosition();
     for (let i = 0; i < this.rings.length; i++) {
       if (
+        !this.ringsHit[i] &&
         this.rings[i].checkPlayerCollision(
           playerX,
           playerY,
@@ -630,6 +633,7 @@ export class Game extends Scene {
         )
       ) {
         this.collidedRings++;
+        this.ringsHit[i] = true;
         // console.log("Collision: collided", { i });
       } else {
         // console.log('Collision: not colliding');
