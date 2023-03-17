@@ -626,6 +626,16 @@ export class FinishGround extends GameObject {
 
     const CABIN_Z = 2750;
     // log cabin
+    shapes.cone_tip.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.baseTransform)
+        .times(Mat4.translation(0, GROUND_Y+70, CABIN_Z))
+        .times(Mat4.scale(55, -20, 55))
+        .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)),
+      material_override ?? barkTexture.override({})
+    );
     shapes.cube.draw(
       context,
       program_state,
