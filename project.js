@@ -15,19 +15,13 @@ import {
 import { Text_Line } from "./examples/text-demo.js";
 
 const {
-  Vector,
-  Vector3,
   vec,
   vec3,
   vec4,
   color,
-  Square,
   hex_color,
-  Shader,
-  Matrix,
   Mat4,
   Light,
-  Shape,
   Texture,
   Material,
   Scene,
@@ -166,20 +160,20 @@ export class Game extends Scene {
   }
 
   bank_left() {
-    let newX =
+    const newX =
       this.playerVelocity[0] * Math.cos(-BANK_ANGLE) -
       this.playerVelocity[2] * Math.sin(-BANK_ANGLE);
-    let newZ =
+    const newZ =
       this.playerVelocity[0] * Math.sin(-BANK_ANGLE) +
       this.playerVelocity[2] * Math.cos(-BANK_ANGLE);
     this.playerVelocity = vec3(newX, this.playerVelocity[1], newZ);
   }
 
   bank_right() {
-    let newX =
+    const newX =
       this.playerVelocity[0] * Math.cos(BANK_ANGLE) -
       this.playerVelocity[2] * Math.sin(BANK_ANGLE);
-    let newZ =
+    const newZ =
       this.playerVelocity[0] * Math.sin(BANK_ANGLE) +
       this.playerVelocity[2] * Math.cos(BANK_ANGLE);
     this.playerVelocity = vec3(newX, this.playerVelocity[1], newZ);
@@ -402,7 +396,7 @@ export class Game extends Scene {
 
     program_state.draw_shadow = shadow_pass;
 
-    for (let object of this.objects) {
+    for (const object of this.objects) {
       if (object === this.player && shadow_pass && this.followCamera) {
         continue;
       }
@@ -458,13 +452,13 @@ export class Game extends Scene {
     }
 
     const dt = program_state.animation_delta_time / 1000;
-    this.update_state(dt);
 
     const v = this.playerVelocity.times(this.speed);
     // console.log(this.playerVelocity)
     // console.log(this.playerPosition)
 
     if (!this.paused) {
+      this.update_state();
       v.scale_by(dt);
       this.playerPosition.add_by(v);
 
@@ -476,10 +470,6 @@ export class Game extends Scene {
 
       this.playTime += dt;
     }
-
-    let rotAngle = vec3(0, 0, Math.sign(this.playerVelocity[2])).cross(
-      this.playerVelocity
-    );
 
     // console.log(Math.asin(rotAngle.norm()));
 
@@ -500,7 +490,7 @@ export class Game extends Scene {
       .times(desired);
     this.player.setBaseTransform(playerMatrix);
 
-    for (let object of this.objects) {
+    for (const object of this.objects) {
       object.update(program_state);
     }
 
@@ -589,7 +579,7 @@ export class Game extends Scene {
 
     const time = Math.floor(this.playTime);
     const score = this.collidedRings * 50;
-    const scoreString = `Score:${score.toString(10).padStart(4, "0")}`;
+    const scoreString = `Score: ${score.toString(10).padStart(3, "0")}`;
     let outputString;
     let textDisplacement;
     if (this.firstPause) {
@@ -599,8 +589,9 @@ export class Game extends Scene {
       outputString = `Died. Press escape to restart`;
       textDisplacement = Mat4.translation(-0.6, 0, -1);
     } else if (this.won || this.playerPosition[2] >= 2600) {
-      outputString =
-        `  Finished with score: ` + score.toString(10).padStart(4, "0"); // three spaces to center text on screen
+      outputString = `  Finished with score: ${score
+        .toString(10)
+        .padStart(4, " ")}`; // three spaces to center text on screen
       textDisplacement = Mat4.translation(-0.6, 0, -1);
       this.paused = true;
       this.won = true;
@@ -731,10 +722,7 @@ export class Game extends Scene {
     // );
   }
 
-  update_state(dt, num_bodies = 40) {
-    if (this.paused) {
-      return;
-    }
+  update_state() {
     const { x: playerX, y: playerY, z: playerZ } = this.player.getPosition();
     const {
       x: lastPlayerX,
@@ -753,20 +741,11 @@ export class Game extends Scene {
     ) {
       this.won = true;
       this.paused = true;
-      this.collidedRings += 2;
+      this.collidedRings += 2; // to increase score
       return;
     }
 
-    if (
-      this.ground.checkPlayerCollision(
-        playerX,
-        playerY,
-        playerZ,
-        lastPlayerX,
-        lastPlayerY,
-        lastPlayerZ
-      )
-    ) {
+    if (this.ground.checkPlayerCollision(playerX, playerY, playerZ)) {
       console.log("collided with deadly force");
       this.dead = true;
       this.paused = true;
@@ -774,22 +753,14 @@ export class Game extends Scene {
     }
 
     for (let i = 0; i < this.ground.children.length; i++) {
-      if (i === 0 || true)
-        if (
-          this.ground.children[i].checkPlayerCollision(
-            playerX,
-            playerY,
-            playerZ,
-            lastPlayerX,
-            lastPlayerY,
-            lastPlayerZ
-          )
-        ) {
-          console.log("collided with deadly force");
-          this.dead = true;
-          this.paused = true;
-          return;
-        }
+      if (
+        this.ground.children[i].checkPlayerCollision(playerX, playerY, playerZ)
+      ) {
+        console.log("collided with deadly force");
+        this.dead = true;
+        this.paused = true;
+        return;
+      }
       // console.log(i);
     }
     for (let i = 0; i < this.rings.length; i++) {
@@ -806,8 +777,6 @@ export class Game extends Scene {
       ) {
         this.collidedRings++;
         // console.log("Collision: collided", { i });
-      } else {
-        // console.log('Collision: not colliding');
       }
     }
   }

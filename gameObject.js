@@ -2,23 +2,12 @@ import { defs, tiny } from "./examples/common.js";
 import { Shadow_Textured_Phong_Shader } from "./examples/shadow-demo-shader.js";
 
 const {
-  Vector,
-  Vector3,
-  vec,
-  vec3,
   vec4,
-  color,
   hex_color,
-  Shader,
-  Matrix,
   Mat4,
-  Light,
-  Shape,
   Material,
 
   Texture,
-  Textured_Phong,
-  Scene,
 } = tiny;
 
 export class GameObject {
@@ -36,7 +25,7 @@ export class GameObject {
   }
 
   update(program_state) {
-    for (let child of this.children) {
+    for (const child of this.children) {
       child.update(program_state);
     }
   }
@@ -48,7 +37,7 @@ export class GameObject {
     material_override,
     light_depth_texture
   ) {
-    for (let child of this.children) {
+    for (const child of this.children) {
       child.draw(
         context,
         program_state,
@@ -145,7 +134,7 @@ const leavesTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
   smoothness: 64,
   light_depth_texture: null,
 });
-const playerTexutre = new Material(new Shadow_Textured_Phong_Shader(1), {
+const playerTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
   ambient: 0.8,
   diffusivity: 0.4,
   specularity: 0.7,
@@ -185,20 +174,6 @@ export class Player extends GameObject {
     material_override,
     light_depth_texture
   ) {
-    // shapes.cube.draw(
-    //   context,
-    //   program_state,
-    //   model_transform
-    //     .times(this.getBaseTransform())
-    //     .times(Mat4.scale(1, 0.5, 2.5)),
-    //   material_override ??
-    //   phong_material.override({
-    //     ambient: 0.9,
-    //     diffusivity: 0.0,
-    //     color: this.wingsuitOrange,
-    //     light_depth_texture,
-    //   })
-    // );
     shapes.sphere.draw(
       context,
       program_state,
@@ -206,7 +181,7 @@ export class Player extends GameObject {
         .times(this.getBaseTransform())
         .times(Mat4.scale(1.5, 1.5, 1.5)),
       material_override ??
-        playerTexutre.override({
+        playerTexture.override({
           light_depth_texture,
         })
     );
@@ -219,7 +194,7 @@ export class Player extends GameObject {
         .times(Mat4.rotation(-Math.PI / 2, 0, 1, 0))
         .times(Mat4.scale(2, 1, 5)),
       material_override ??
-        playerTexutre.override({
+        playerTexture.override({
           light_depth_texture,
         })
     );
@@ -232,7 +207,7 @@ export class Player extends GameObject {
         .times(Mat4.rotation(Math.PI / 2, 0, 1, 0))
         .times(Mat4.scale(2, 1, 5)),
       material_override ??
-        playerTexutre.override({
+        playerTexture.override({
           light_depth_texture,
         })
     );
@@ -246,7 +221,7 @@ export class Player extends GameObject {
         .times(Mat4.rotation(Math.PI, 0, 1, 0))
         .times(Mat4.scale(4, 2, 4)),
       material_override ??
-        playerTexutre.override({
+        playerTexture.override({
           light_depth_texture,
         })
     );
@@ -385,14 +360,7 @@ export class Tree extends GameObject {
     super(baseTransform);
   }
 
-  checkPlayerCollision(
-    playerX,
-    playerY,
-    playerZ,
-    lastPlayerX,
-    lastPlayerY,
-    lastPlayerZ
-  ) {
+  checkPlayerCollision(playerX, playerY, playerZ) {
     // height = 50, r = 5
     const treeCoords = groundRotation
       .times(this.baseTransform)
@@ -483,14 +451,7 @@ export class Mountain extends GameObject {
     super(baseTransform);
   }
 
-  checkPlayerCollision(
-    playerX,
-    playerY,
-    playerZ,
-    lastPlayerX,
-    lastPlayerY,
-    lastPlayerZ
-  ) {
+  checkPlayerCollision(playerX, playerY, playerZ) {
     // const MOUNTAIN_HEIGHT = 400;
     // const MOUNTAIN_WIDTH = 200;
     const mountainCoords = groundRotation
@@ -501,7 +462,7 @@ export class Mountain extends GameObject {
     const mountainX = mountainCoords[0][3],
       mountainY = mountainCoords[1][3],
       mountainZ = mountainCoords[2][3];
-    const collisionRadius = 150 && MOUNTAIN_WIDTH;
+    const collisionRadius = MOUNTAIN_WIDTH;
     if (
       playerY > mountainY + 250 * 2 ||
       playerY <= mountainY - 250 ||
@@ -647,18 +608,16 @@ export class FinishGround extends GameObject {
     super(baseTransform);
   }
 
-  draw(
-    context,
-    program_state,
-    model_transform,
-    material_override,
-    light_depth_texture
-  ) {
+  draw(context, program_state, model_transform, material_override, _) {
     shapes.square.draw(
       context,
       program_state,
-      model_transform.times(this.baseTransform).times(Mat4.translation(0, -1500, 2500)).times(Mat4.scale(3000, 3000, 3000)).times(Mat4.rotation(Math.PI/2, 1, 0, 0)),
-    material_override ?? snowTexture.override({ color: hex_color("#808080") })
+      model_transform
+        .times(this.baseTransform)
+        .times(Mat4.translation(0, -1500, 2500))
+        .times(Mat4.scale(3000, 3000, 3000))
+        .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)),
+      material_override ?? snowTexture.override({ color: hex_color("#808080") })
     );
 
     // for (let tree of this.children) {
@@ -738,7 +697,10 @@ export class FinishRing extends GameObject {
     shapes.torus.draw(
       context,
       program_state,
-      model_transform.times(this.baseTransform).times(Mat4.translation(0, -1200, 2500)).times(Mat4.scale(250, 250, 250)),
+      model_transform
+        .times(this.baseTransform)
+        .times(Mat4.translation(0, -1200, 2500))
+        .times(Mat4.scale(250, 250, 250)),
       material_override ??
         phong_material.override({
           ambient: 0.4,
