@@ -589,10 +589,10 @@ export class Game extends Scene {
       outputString = `Died. Press escape to restart`;
       textDisplacement = Mat4.translation(-0.6, 0, -1);
     } else if (this.won || this.playerPosition[2] >= 2600) {
-      outputString = `  Finished with score: ${score
+      outputString = `Finished with score${score
         .toString(10)
-        .padStart(4, " ")}`; // three spaces to center text on screen
-      textDisplacement = Mat4.translation(-0.6, 0, -1);
+        .padStart(4, " ")} in ${time}s`; // three spaces to center text on screen
+      textDisplacement = Mat4.translation(-0.65, 0, -1);
       this.paused = true;
       this.won = true;
     } else {
