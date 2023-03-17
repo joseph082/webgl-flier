@@ -55,7 +55,7 @@ export class Game extends Scene {
       torus: new defs.Torus(15, 15),
       square_2d: new defs.Square(),
       cube: new defs.Cube(),
-      text: new Text_Line(35),
+      text: new Text_Line(105),
     };
 
     this.reset();
@@ -555,27 +555,31 @@ export class Game extends Scene {
 
     this.shapes.cube.draw(context, program_state, funny_orbit, this.grey);
 
-
-    let strings = ["This is some text", "More text", "1234567890", "This is a line.\n\n\n" + "This is another line.",
-      Text_Line.toString(), Text_Line.toString()];
+    const score = Math.floor(t);
+    const time = t;
+    const scoreString = `Score:${score.toString(10).padStart(4, '0')}`;
+    const outputString = [`${scoreString}         Time: ${Math.floor(time)}`];
 
     // Sample the "strings" array and draw them onto a cube.
-    for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < 2; j++) {             // Find the matrix for a basis located along one of the cube's sides:
-        let cube_side = Mat4.rotation(i == 0 ? Math.PI / 2 : 0, 1, 0, 0)
-          .times(Mat4.rotation(Math.PI * j - (i == 1 ? Math.PI / 2 : 0), 0, 1, 0))
-          .times(Mat4.translation(-.9, .9, 1.01));
 
-        const multi_line_string = strings[2 * i + j].split('\n');
-        // Draw a Text_String for every line in our string, up to 30 lines:
-        for (let line of multi_line_string.slice(0, 30)) {             // Assign the string to Text_String, and then draw it.
-          this.shapes.text.set_string(line, context.context);
-          this.shapes.text.draw(context, program_state, funny_orbit.times(cube_side)
-            .times(Mat4.scale(.03, .03, .03)), this.text_image);
-          // Move our basis down a line.
-          cube_side.post_multiply(Mat4.translation(0, -.06, 0));
-        }
-      }
+
+    const multi_line_string = outputString[0].split('\n');
+    // Draw a Text_String for every line in our string, up to 30 lines:
+    for (const line of outputString) {             // Assign the string to Text_String, and then draw it.
+      this.shapes.text.set_string(line, context.context);
+      // this.shapes.text.draw(context, program_state, funny_orbit.times(cube_side)
+      //   .times(Mat4.scale(.03, .03, .03)), this.text_image);
+
+      // this.shapes.text.draw(context, program_state, Mat4.translation(-0.99, 0.08, 0).times(
+      //   Mat4.scale(0.5, (0.5 * gl.canvas.width) / gl.canvas.height, 1)
+      // ), this.text_image);
+
+      const textScale = 0.03;
+      this.shapes.text.draw(context, program_state,
+        program_state.camera_transform.times(Mat4.translation(-60 / 100, 35 / 100, -1).times(Mat4.scale(textScale, textScale, textScale))), this.text_image);
+
+      // Move our basis down a line.
+
     }
 
 
