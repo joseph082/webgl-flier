@@ -61,11 +61,11 @@ export class GameObject {
 
   // https://github.com/Robert-Lu/tiny-graphics-demo3/blob/main/examples/collisions-demo.js
   static intersect_cube(p, margin = 0) {
-    return p.every(value => value >= -1 - margin && value <= 1 + margin)
+    return p.every((value) => value >= -1 - margin && value <= 1 + margin);
   }
 
   static intersect_sphere(p, margin = 0) {
-      return p.dot(p) < 1 + margin;
+    return p.dot(p) < 1 + margin;
   }
 
   check_if_colliding(b, collider) {
@@ -75,31 +75,33 @@ export class GameObject {
     // through a list of discrete sphere points to see if the ellipsoids intersect is *really* a
     // hack (there are perfectly good analytic expressions that can test if two ellipsoids
     // intersect without discretizing them into points).
-    if (this === b)
-        return false;
+    if (this === b) return false;
     // Nothing collides with itself.
     // Convert sphere b to the frame where a is a unit sphere:
-    const T = this.inverse.times(b.drawn_location ?? b.getBaseTransform(), this.temp_matrix ?? Mat4.identity());
+    const T = this.inverse.times(
+      b.drawn_location ?? b.getBaseTransform(),
+      this.temp_matrix ?? Mat4.identity()
+    );
 
-    const {intersect_test, points, leeway} = collider;
+    const { intersect_test, points, leeway } = collider;
     // For each vertex in that b, shift to the coordinate frame of
     // a_inv*b.  Check if in that coordinate frame it penetrates
     // the unit sphere at the origin.  Leave some leeway.
-    return points.arrays.position.some(p =>
-        intersect_test(T.times(p.to4(1)).to3(), leeway));
+    return points.arrays.position.some((p) =>
+      intersect_test(T.times(p.to4(1)).to3(), leeway)
+    );
   }
 }
 
 const shapes = {
   square: new defs.Square(),
-  trapezoidalPrism:
-    new defs.Capped_Cylinder(10, 10, Mat4.scale(3, 1, 1)),
+  trapezoidalPrism: new defs.Capped_Cylinder(10, 10, Mat4.scale(3, 1, 1)),
   sphere: new defs.Subdivision_Sphere(8),
   cone: new defs.Cone_Tip(10, 10),
   torus: new defs.Torus(16, 16),
   cube: new defs.Cube(),
   cone: new defs.Closed_Cone(10, 10),
-  cylinder: new defs.Rounded_Capped_Cylinder(10, 10)
+  cylinder: new defs.Rounded_Capped_Cylinder(10, 10),
 };
 
 for (let i = 0; i < shapes.square.arrays.texture_coord.length; i++) {
@@ -153,7 +155,7 @@ const barkTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
   specularity: 0.2,
   color_texture: new Texture("assets/bark.png"),
   smoothness: 64,
-  light_depth_texture: null
+  light_depth_texture: null,
 });
 const leavesTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
   ambient: 0.6,
@@ -162,7 +164,7 @@ const leavesTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
   color_texture: new Texture("assets/snow2.png"),
   // color: hex_color("#00FF00"),
   smoothness: 64,
-  light_depth_texture: null
+  light_depth_texture: null,
 });
 const playerTexutre = new Material(new Shadow_Textured_Phong_Shader(1), {
   ambient: 0.8,
@@ -171,7 +173,7 @@ const playerTexutre = new Material(new Shadow_Textured_Phong_Shader(1), {
   // color_texture: new Texture("assets/player.png"),
   color: hex_color("#DD571C"),
   smoothness: 64,
-  light_depth_texture: null
+  light_depth_texture: null,
 });
 
 const groundRotation = Mat4.rotation((Math.PI * 2) / 3, 1, 0, 0);
@@ -212,11 +214,11 @@ export class Player extends GameObject {
         .times(this.getBaseTransform())
         .times(Mat4.scale(1.5, 1.5, 1.5)),
       material_override ??
-      playerTexutre.override({
-        light_depth_texture,
-      })
+        playerTexutre.override({
+          light_depth_texture,
+        })
     );
-    
+
     shapes.cone.draw(
       context,
       program_state,
@@ -225,11 +227,11 @@ export class Player extends GameObject {
         .times(Mat4.rotation(-Math.PI / 2, 0, 1, 0))
         .times(Mat4.scale(2, 1, 5)),
       material_override ??
-      playerTexutre.override({
-        light_depth_texture,
-      })
+        playerTexutre.override({
+          light_depth_texture,
+        })
     );
-    
+
     shapes.cone.draw(
       context,
       program_state,
@@ -238,9 +240,9 @@ export class Player extends GameObject {
         .times(Mat4.rotation(Math.PI / 2, 0, 1, 0))
         .times(Mat4.scale(2, 1, 5)),
       material_override ??
-      playerTexutre.override({
-        light_depth_texture,
-      })
+        playerTexutre.override({
+          light_depth_texture,
+        })
     );
     // // bottom cone
     // shapes.cone.draw(
@@ -274,12 +276,12 @@ export class Ring extends GameObject {
       program_state,
       model_transform.times(this.baseTransform),
       material_override ??
-      phong_material.override({
-        ambient: 0.4,
-        diffusivity: 0.6,
-        color: hex_color("#FF0000"),
-        light_depth_texture,
-      })
+        phong_material.override({
+          ambient: 0.4,
+          diffusivity: 0.6,
+          color: hex_color("#FF0000"),
+          light_depth_texture,
+        })
     );
   }
 }
@@ -310,10 +312,10 @@ export class Rock extends GameObject {
           Mat4.scale(this.randomScaling, this.randomScaling, this.randomScaling)
         ),
       material_override ??
-      rockTexture.override({
-        light_depth_texture,
-        //color: hex_color("#7F8386"),
-      })
+        rockTexture.override({
+          light_depth_texture,
+          //color: hex_color("#7F8386"),
+        })
     );
 
     // shapes.cube.draw(
@@ -358,8 +360,7 @@ export class Tree extends GameObject {
         .times(invertedGroundRotation)
         .times(Mat4.rotation(-Math.PI / 2, 1, 0, 0))
         .times(Mat4.scale(2, 2, TREE_HEIGHT)),
-      material_override ??
-      barkTexture.override({ light_depth_texture })
+      material_override ?? barkTexture.override({ light_depth_texture })
     );
 
     // position of this might be centered? so needs to scale more?
@@ -373,8 +374,7 @@ export class Tree extends GameObject {
         .times(Mat4.rotation(-Math.PI / 2, 1, 0, 0))
         .times(Mat4.translation(0, 0, 15))
         .times(Mat4.scale(4.5, 4.5, TREE_HEIGHT)),
-      material_override ??
-      leavesTexture.override({ light_depth_texture })
+      material_override ?? leavesTexture.override({ light_depth_texture })
     );
   }
 }
@@ -387,13 +387,17 @@ export class Ground extends GameObject {
       const x = Math.random() * 2000 - 1000;
       const y = Math.random() * 2000;
       const z = -5;
-      this.children.push(new Tree(Mat4.translation(x, y, z).times(Mat4.scale(2, 3, 2))));
+      this.children.push(
+        new Tree(Mat4.translation(x, y, z).times(Mat4.scale(2, 3, 2)))
+      );
     }
     for (let i = 0; i < 40; i++) {
       const x = Math.random() * 2000 - 1000;
       const y = Math.random() * 2000;
       const z = -5;
-      this.children.push(new Rock(Mat4.translation(x, y, z).times(Mat4.scale(1.5, 1.5, 1.5))));
+      this.children.push(
+        new Rock(Mat4.translation(x, y, z).times(Mat4.scale(1.5, 1.5, 1.5)))
+      );
     }
   }
 

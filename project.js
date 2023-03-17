@@ -77,9 +77,9 @@ export class Game extends Scene {
     };
 
     this.initial_camera_location = Mat4.look_at(
-        vec3(0, 20, -20),
-        vec3(0, 20, 0),
-        vec3(0, 1, 0)
+      vec3(0, 20, -20),
+      vec3(0, 20, 0),
+      vec3(0, 1, 0)
     );
 
     this.depth_tex = new Material(new Depth_Texture_Shader_2D(), {
@@ -91,7 +91,11 @@ export class Game extends Scene {
     });
 
     // this.collider = {intersect_test: GameObject.intersect_sphere, points: new defs.Subdivision_Sphere(8), leeway: .5};
-    this.collider = {intersect_test: GameObject.intersect_sphere, points: new defs.Subdivision_Sphere(4), leeway: 0};
+    this.collider = {
+      intersect_test: GameObject.intersect_sphere,
+      points: new defs.Subdivision_Sphere(4),
+      leeway: 0,
+    };
   }
 
   left_vector() {
@@ -100,8 +104,7 @@ export class Game extends Scene {
 
   flatten_up() {
     // console.log(this.playerVelocity)
-    if (this.speed > MIN_SPEED)
-      this.speed-=FLATTEN_DECELERATION;
+    if (this.speed > MIN_SPEED) this.speed -= FLATTEN_DECELERATION;
     if (this.playerVelocity[1] < MAX_VERTICAL_ANGLE)
       this.playerVelocity.add_by(vec3(0, 0.01, 0));
     // let angleDif = Math.acos(Math.sqrt(this.playerVelocity[1]**2 + this.playerVelocity[2]**2));
@@ -129,8 +132,7 @@ export class Game extends Scene {
   dive_down() {
     // console.log(this.playerVelocity)
 
-    if (this.speed < MAX_SPEED)
-      this.speed+=DIVE_ACCELERATION;
+    if (this.speed < MAX_SPEED) this.speed += DIVE_ACCELERATION;
     this.playerVelocity.add_by(vec3(0, -0.01, 0));
     // let angleDif = Math.acos(Math.sqrt(this.playerVelocity[1]**2 + this.playerVelocity[2]**2));
     // console.log(angleDif);    // let clockwiseRotation = (0 < this.playerVelocity[0] && 0 < this.playerVelocity[2]) || (this.playerVelocity[0] < 0 || this.playerVelocity[2] < 0);
@@ -153,46 +155,96 @@ export class Game extends Scene {
   }
 
   bank_left() {
-    let newX = this.playerVelocity[0] * Math.cos(-BANK_ANGLE) - this.playerVelocity[2] * Math.sin(-BANK_ANGLE);
-    let newZ = this.playerVelocity[0] * Math.sin(-BANK_ANGLE) + this.playerVelocity[2] * Math.cos(-BANK_ANGLE);
+    let newX =
+      this.playerVelocity[0] * Math.cos(-BANK_ANGLE) -
+      this.playerVelocity[2] * Math.sin(-BANK_ANGLE);
+    let newZ =
+      this.playerVelocity[0] * Math.sin(-BANK_ANGLE) +
+      this.playerVelocity[2] * Math.cos(-BANK_ANGLE);
     this.playerVelocity = vec3(newX, this.playerVelocity[1], newZ);
   }
 
   bank_right() {
-    let newX = this.playerVelocity[0] * Math.cos(BANK_ANGLE) - this.playerVelocity[2] * Math.sin(BANK_ANGLE);
-    let newZ = this.playerVelocity[0] * Math.sin(BANK_ANGLE) + this.playerVelocity[2] * Math.cos(BANK_ANGLE);
+    let newX =
+      this.playerVelocity[0] * Math.cos(BANK_ANGLE) -
+      this.playerVelocity[2] * Math.sin(BANK_ANGLE);
+    let newZ =
+      this.playerVelocity[0] * Math.sin(BANK_ANGLE) +
+      this.playerVelocity[2] * Math.cos(BANK_ANGLE);
     this.playerVelocity = vec3(newX, this.playerVelocity[1], newZ);
   }
 
   lateral_left() {
-    if (-20 < this.lateral_value)
-      this.lateral_value--;
+    if (-20 < this.lateral_value) this.lateral_value--;
   }
 
   lateral_right() {
-    if (this.lateral_value < 20)
-      this.lateral_value++;
+    if (this.lateral_value < 20) this.lateral_value++;
   }
 
   make_control_panel() {
     // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
-    this.key_triggered_button("Flatten", ["w"], () => this.flatten_up_press = true, "#6E6460", () => this.flatten_up_press = false);
-    this.key_triggered_button("Dive down", ["s"], () => this.dive_down_press = true, "#6E6460", () => this.dive_down_press = false);
+    this.key_triggered_button(
+      "Flatten",
+      ["w"],
+      () => (this.flatten_up_press = true),
+      "#6E6460",
+      () => (this.flatten_up_press = false)
+    );
+    this.key_triggered_button(
+      "Dive down",
+      ["s"],
+      () => (this.dive_down_press = true),
+      "#6E6460",
+      () => (this.dive_down_press = false)
+    );
     this.new_line();
-    this.key_triggered_button("Bank Left", ["a"], () => this.bank_left_press = true, "#6E6460", () => this.bank_left_press = false);
-    this.key_triggered_button("Bank Right", ["d"], () => this.bank_right_press = true, "#6E6460", () => this.bank_right_press = false);
+    this.key_triggered_button(
+      "Bank Left",
+      ["a"],
+      () => (this.bank_left_press = true),
+      "#6E6460",
+      () => (this.bank_left_press = false)
+    );
+    this.key_triggered_button(
+      "Bank Right",
+      ["d"],
+      () => (this.bank_right_press = true),
+      "#6E6460",
+      () => (this.bank_right_press = false)
+    );
     this.new_line();
-    this.key_triggered_button("Lateral Move Left", ["q"], () => this.lateral_left_press = true, "#6E6460", () => this.lateral_left_press = false);
-    this.key_triggered_button("Lateral Move Right", ["e"], () => this.lateral_right_press = true, "#6E6460", () => this.lateral_right_press = false);
+    this.key_triggered_button(
+      "Lateral Move Left",
+      ["q"],
+      () => (this.lateral_left_press = true),
+      "#6E6460",
+      () => (this.lateral_left_press = false)
+    );
+    this.key_triggered_button(
+      "Lateral Move Right",
+      ["e"],
+      () => (this.lateral_right_press = true),
+      "#6E6460",
+      () => (this.lateral_right_press = false)
+    );
     this.new_line();
-    this.key_triggered_button("Pause", [" "], () => this.paused = !this.paused);
+    this.key_triggered_button(
+      "Pause",
+      [" "],
+      () => (this.paused = !this.paused)
+    );
     this.key_triggered_button("Reset", ["Escape"], () => this.reset());
     this.new_line();
-    this.key_triggered_button("Toggle Free Cam", ["l"], () => this.followCamera = !this.followCamera);
+    this.key_triggered_button(
+      "Toggle Free Cam",
+      ["l"],
+      () => (this.followCamera = !this.followCamera)
+    );
   }
 
   reset() {
-    console.log('Reset game');
+    console.log("Reset game");
     this.playerPosition = vec3(0, INITIAL_HEIGHT, 5);
     this.playerVelocity = vec3(0, -0.5, 1);
     this.speed = INITIAL_SPEED;
@@ -207,17 +259,13 @@ export class Game extends Scene {
       const x = Math.random() * 400 - 200;
       const z = 200 + 220 * i;
       const y = -z * Math.sin(Math.PI / 6) + 50 - 20 * Math.random() - 10 * i;
-      this.rings.push(new Ring(
-        Mat4.translation(x, y, z).times(Mat4.scale(15, 15, 15))
-      ));
+      this.rings.push(
+        new Ring(Mat4.translation(x, y, z).times(Mat4.scale(15, 15, 15)))
+      );
     }
 
     this.ground = new Ground(Mat4.identity());
-    this.objects = [
-      this.ground,
-      this.player,
-      ...this.rings
-    ];
+    this.objects = [this.ground, this.player, ...this.rings];
 
     this.flatten_up_press = false;
     this.dive_down_press = false;
@@ -240,15 +288,15 @@ export class Game extends Scene {
     this.lightDepthTextureSize = LIGHT_DEPTH_TEX_SIZE;
     gl.bindTexture(gl.TEXTURE_2D, this.lightDepthTexture);
     gl.texImage2D(
-        gl.TEXTURE_2D, // target
-        0, // mip level
-        gl.DEPTH_COMPONENT, // internal format
-        this.lightDepthTextureSize, // width
-        this.lightDepthTextureSize, // height
-        0, // border
-        gl.DEPTH_COMPONENT, // format
-        gl.UNSIGNED_INT, // type
-        null
+      gl.TEXTURE_2D, // target
+      0, // mip level
+      gl.DEPTH_COMPONENT, // internal format
+      this.lightDepthTextureSize, // width
+      this.lightDepthTextureSize, // height
+      0, // border
+      gl.DEPTH_COMPONENT, // format
+      gl.UNSIGNED_INT, // type
+      null
     ); // data
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -259,11 +307,11 @@ export class Game extends Scene {
     this.lightDepthFramebuffer = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.lightDepthFramebuffer);
     gl.framebufferTexture2D(
-        gl.FRAMEBUFFER, // target
-        gl.DEPTH_ATTACHMENT, // attachment point
-        gl.TEXTURE_2D, // texture target
-        this.lightDepthTexture, // texture
-        0
+      gl.FRAMEBUFFER, // target
+      gl.DEPTH_ATTACHMENT, // attachment point
+      gl.TEXTURE_2D, // texture target
+      this.lightDepthTexture, // texture
+      0
     ); // mip level
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
@@ -272,15 +320,15 @@ export class Game extends Scene {
     this.unusedTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, this.unusedTexture);
     gl.texImage2D(
-        gl.TEXTURE_2D,
-        0,
-        gl.RGBA,
-        this.lightDepthTextureSize,
-        this.lightDepthTextureSize,
-        0,
-        gl.RGBA,
-        gl.UNSIGNED_BYTE,
-        null
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      this.lightDepthTextureSize,
+      this.lightDepthTextureSize,
+      0,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      null
     );
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -288,11 +336,11 @@ export class Game extends Scene {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     // attach it to the framebuffer
     gl.framebufferTexture2D(
-        gl.FRAMEBUFFER, // target
-        gl.COLOR_ATTACHMENT0, // attachment point
-        gl.TEXTURE_2D, // texture target
-        this.unusedTexture, // texture
-        0
+      gl.FRAMEBUFFER, // target
+      gl.COLOR_ATTACHMENT0, // attachment point
+      gl.TEXTURE_2D, // texture target
+      this.unusedTexture, // texture
+      0
     ); // mip level
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
@@ -307,32 +355,29 @@ export class Game extends Scene {
         continue;
       }
       object.draw(
-          context,
-          program_state,
-          Mat4.identity(),
-          material_override,
-          shadow_pass ? this.light_depth_texture : null
+        context,
+        program_state,
+        Mat4.identity(),
+        material_override,
+        shadow_pass ? this.light_depth_texture : null
       );
     }
   }
 
   display(context, program_state) {
-
     if (!this.paused) {
-      if (this.flatten_up_press)
-        this.flatten_up();
-      if (this.dive_down_press)
-        this.dive_down();
-      if (this.bank_left_press)
-        this.bank_left();
-      if (this.bank_right_press)
-        this.bank_right();
-      if (this.lateral_left_press)
-        this.lateral_left();
-      if (this.lateral_right_press)
-        this.lateral_right();
-      if (!this.lateral_right_press && !this.lateral_left_press && this.lateral_value != 0)
-        this.lateral_value -= (0 < this.lateral_value ? 1 : -1);
+      if (this.flatten_up_press) this.flatten_up();
+      if (this.dive_down_press) this.dive_down();
+      if (this.bank_left_press) this.bank_left();
+      if (this.bank_right_press) this.bank_right();
+      if (this.lateral_left_press) this.lateral_left();
+      if (this.lateral_right_press) this.lateral_right();
+      if (
+        !this.lateral_right_press &&
+        !this.lateral_left_press &&
+        this.lateral_value != 0
+      )
+        this.lateral_value -= 0 < this.lateral_value ? 1 : -1;
     }
 
     this.playerVelocity.normalize();
@@ -353,7 +398,7 @@ export class Game extends Scene {
     // Setup -- This part sets up the scene's overall camera matrix, projection matrix, and lights:
     if (!context.scratchpad.controls) {
       this.children.push(
-          (context.scratchpad.controls = new defs.Movement_Controls())
+        (context.scratchpad.controls = new defs.Movement_Controls())
       );
 
       // Define the global camera and projection matrices, which are stored in program_state.
@@ -361,7 +406,7 @@ export class Game extends Scene {
     }
 
     const dt = program_state.animation_delta_time / 1000;
-    this.update_state(dt)
+    this.update_state(dt);
 
     const v = this.playerVelocity.times(this.speed);
     // console.log(this.playerVelocity)
@@ -370,30 +415,35 @@ export class Game extends Scene {
     if (!this.paused) {
       v.scale_by(dt);
       this.playerPosition.add_by(v);
-      
-      let lateralVec = this.playerVelocity.cross(vec(0, 1, 0)).times(this.lateral_value);
-      lateralVec.scale_by(dt*LATERAL_SPEED);
-      this.playerPosition.add_by(lateralVec);     
+
+      let lateralVec = this.playerVelocity
+        .cross(vec(0, 1, 0))
+        .times(this.lateral_value);
+      lateralVec.scale_by(dt * LATERAL_SPEED);
+      this.playerPosition.add_by(lateralVec);
     }
 
-    let rotAngle = vec3(0, 0, Math.sign(this.playerVelocity[2])).cross(this.playerVelocity);
+    let rotAngle = vec3(0, 0, Math.sign(this.playerVelocity[2])).cross(
+      this.playerVelocity
+    );
 
     // console.log(Math.asin(rotAngle.norm()));
- 
+
     const desired = Mat4.look_at(
       // vec3(0, 20, 0),
-      vec3(0,0,0).minus(vec3(this.playerVelocity[0], 0, this.playerVelocity[2])),
-      vec3(0,0,0),
+      vec3(0, 0, 0).minus(
+        vec3(this.playerVelocity[0], 0, this.playerVelocity[2])
+      ),
+      vec3(0, 0, 0),
       // vec3(0, 20, -20),
       // vec3(0, 0, 20),
       vec3(0, -1, 0)
     );
-    
+
     let playerMatrix = Mat4.identity()
       .times(Mat4.translation(...this.playerPosition))
-      .times(Mat4.rotation(this.lateral_value/20, ...this.playerVelocity))
-      .times(desired)
-      ;
+      .times(Mat4.rotation(this.lateral_value / 20, ...this.playerVelocity))
+      .times(desired);
     this.player.setBaseTransform(playerMatrix);
 
     for (let object of this.objects) {
@@ -402,13 +452,13 @@ export class Game extends Scene {
 
     // TODO: Lighting (Requirement 2)
     this.light_position = vec4(
-        this.playerPosition[0],
-        this.playerPosition[1] + 300,
-        this.playerPosition[2] - 200,
-        // 0,
-        // 500,
-        // 0,
-        1
+      this.playerPosition[0],
+      this.playerPosition[1] + 300,
+      this.playerPosition[2] - 200,
+      // 0,
+      // 500,
+      // 0,
+      1
     );
     // The parameters of the Light are: position, color, size
     program_state.lights = [
@@ -416,32 +466,32 @@ export class Game extends Scene {
     ];
 
     this.light_view_target = vec4(
-        // 0,-50,50,
-        this.playerPosition[0],
-        this.playerPosition[1] - 100,
-        this.playerPosition[2],
-        1
+      // 0,-50,50,
+      this.playerPosition[0],
+      this.playerPosition[1] - 100,
+      this.playerPosition[2],
+      1
     );
     this.light_field_of_view = (150 * Math.PI) / 180; // 130 degree
 
     const light_view_mat = Mat4.look_at(
-        vec3(
-            this.light_position[0],
-            this.light_position[1],
-            this.light_position[2]
-        ),
-        vec3(
-            this.light_view_target[0],
-            this.light_view_target[1],
-            this.light_view_target[2] - 10
-        ),
-        vec3(1, 0, 0) // assume the light to target will have a up dir of +y, maybe need to change according to your case
+      vec3(
+        this.light_position[0],
+        this.light_position[1],
+        this.light_position[2]
+      ),
+      vec3(
+        this.light_view_target[0],
+        this.light_view_target[1],
+        this.light_view_target[2] - 10
+      ),
+      vec3(1, 0, 0) // assume the light to target will have a up dir of +y, maybe need to change according to your case
     );
     const light_proj_mat = Mat4.perspective(
-        this.light_field_of_view,
-        1,
-        5,
-        5000
+      this.light_field_of_view,
+      1,
+      5,
+      5000
     );
     // Bind the Depth Texture Buffer
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.lightDepthFramebuffer);
@@ -464,21 +514,23 @@ export class Game extends Scene {
       // const dv = this.playerVelocity.copy();
       // dv.scale_by(-6);
       const desired = Mat4.look_at(
-          // vec3(0, 20, 0),
-          this.playerPosition.minus(this.playerVelocity.times(CAM_DISTANCE)).plus(vec3(0, CAM_DISTANCE/1.5, 0)),
-          this.playerPosition,
-          // vec3(0, 20, -20),
-          // vec3(0, 0, 20),
-          vec3(0, 1, 0)
+        // vec3(0, 20, 0),
+        this.playerPosition
+          .minus(this.playerVelocity.times(CAM_DISTANCE))
+          .plus(vec3(0, CAM_DISTANCE / 1.5, 0)),
+        this.playerPosition,
+        // vec3(0, 20, -20),
+        // vec3(0, 0, 20),
+        vec3(0, 1, 0)
       );
       program_state.set_camera(desired);
     }
 
     program_state.projection_transform = Mat4.perspective(
-        Math.PI / 4,
-        context.width / context.height,
-        0.1,
-        2000
+      Math.PI / 4,
+      context.width / context.height,
+      0.1,
+      2000
     );
 
     program_state.view_mat = program_state.camera_inverse;
@@ -536,10 +588,10 @@ export class Game extends Scene {
       if (this.rings[i] instanceof Player) {
         continue;
       }
-      this.rings[i].inverse = Mat4.inverse(this.rings[i].getBaseTransform())
+      this.rings[i].inverse = Mat4.inverse(this.rings[i].getBaseTransform());
       // this.collider = {intersect_test: GameObject.intersect_sphere, points: new defs.Subdivision_Sphere(8), leeway: .5};
       if (this.player.check_if_colliding(this.objects[i], this.collider)) {
-        console.log('Collision: collided', { i });
+        console.log("Collision: collided", { i });
       } else {
         // console.log('Collision: not colliding');
       }
