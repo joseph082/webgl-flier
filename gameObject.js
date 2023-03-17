@@ -625,17 +625,40 @@ export class FinishGround extends GameObject {
     );
 
     const CABIN_Z = 2750;
-    // log cabin
+    //roof
     shapes.cone_tip.draw(
       context,
       program_state,
       model_transform
         .times(this.baseTransform)
-        .times(Mat4.translation(0, GROUND_Y+70, CABIN_Z))
+        .times(Mat4.translation(0, GROUND_Y+72, CABIN_Z))
         .times(Mat4.scale(55, -20, 55))
         .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)),
       material_override ?? barkTexture.override({})
     );
+    //door
+    shapes.cube.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.baseTransform)
+        .times(Mat4.translation(0, GROUND_Y, CABIN_Z-30.2))
+        .times(Mat4.scale(5, -20, -0.2)),
+      material_override ?? phong_material.override({color:hex_color('#b99976')})
+    );
+
+    //doorknob
+    shapes.cube.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.baseTransform)
+        .times(Mat4.translation(-2.2, GROUND_Y + 9, CABIN_Z-30.4))
+        .times(Mat4.scale(1, -1, -0.2)),
+      material_override ?? phong_material.override({color:hex_color('#111111')})
+    );
+
+    // log cabin
     shapes.cube.draw(
       context,
       program_state,
