@@ -679,7 +679,7 @@ export class FinishGround extends GameObject {
 export class FinishRing extends GameObject {
   constructor(baseTransform) {
     super(baseTransform);
-    this.ringSize = baseTransform[0][0];
+    this.ringSize = baseTransform[0][0] * 250;
     this.collided = false;
   }
 
@@ -694,13 +694,16 @@ export class FinishRing extends GameObject {
     if (this.collided) {
       return false;
     }
-    const ringZ = this.baseTransform[2][3];
+    const baseTransform = this.baseTransform.times(
+      Mat4.translation(0, -1100, 2500)
+    );
+    const ringZ = baseTransform[2][3];
 
     if (ringZ <= lastPlayerZ || ringZ >= playerZ) {
       return false;
     }
-    const ringX = this.baseTransform[0][3],
-      ringY = this.baseTransform[1][3];
+    const ringX = baseTransform[0][3],
+      ringY = baseTransform[1][3];
 
     const dx = playerX - lastPlayerX;
     const dy = playerY - lastPlayerY;
@@ -709,10 +712,10 @@ export class FinishRing extends GameObject {
     const dt = dz !== 0 ? (ringZ - lastPlayerZ) / dz : 0;
     const approxPlayerX = lastPlayerX + dx * dt;
     const approxPlayerY = lastPlayerY + dy * dt;
-    // console.log({ playerX, lastPlayerX, approxPlayerX });
+
     if (
       Math.sqrt((approxPlayerX - ringX) ** 2 + (approxPlayerY - ringY) ** 2) <
-      this.ringSize / 2 + 5
+      this.ringSize
     ) {
       console.log("collided with ring", {
         dist: Math.sqrt(
