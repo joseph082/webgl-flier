@@ -61,6 +61,7 @@ export class Game extends Scene {
       torus: new defs.Torus(15, 15),
       square_2d: new defs.Square(),
       cube: new defs.Cube(),
+      snowflake: new defs.Regular_2D_Polygon(8, 8),
       text: new Text_Line(105),
     };
 
@@ -83,6 +84,12 @@ export class Game extends Scene {
       test: new Material(new defs.Phong_Shader(), {
         ambient: 0.4,
         diffusivity: 0.6,
+        color: hex_color("#ffffff"),
+      }),
+      snow: new Material(new defs.Phong_Shader(), {
+        ambient: 0.9,
+        diffusivity: 0,
+        specularity: 0,
         color: hex_color("#ffffff"),
       }),
     };
@@ -259,6 +266,19 @@ export class Game extends Scene {
 
     this.rings = [];
     this.ringsHit = [];
+
+    this.snowDisplacementRandoms = [
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      Math.random(),
+      Math.random(),
+    ];
 
     // Generate rings.
     for (let i = 0; i < 10; i++) {
@@ -583,6 +603,20 @@ export class Game extends Scene {
     this.shapes.text.set_string(outputString, context.context);
 
     const textScale = 0.03;
+    const snowScale = 0.01;
+
+    const snowDisplacements = [
+      Mat4.translation(Math.cos(this.playTime - 2 + this.snowDisplacementRandoms[0]) + this.snowDisplacementRandoms[0], (this.playTime % 1.9) * -1 + 1, -1),
+      Mat4.translation(Math.sin(1.1 * this.playTime - 1.5 + this.snowDisplacementRandoms[1]) + this.snowDisplacementRandoms[1], (this.playTime % (1.9 + this.snowDisplacementRandoms[1])) * -1 + 1, -1),
+      Mat4.translation(Math.cos(this.playTime - 1 + this.snowDisplacementRandoms[2]) + 0.1, (this.playTime % 2.3) * -1 + 1, -1),
+      Mat4.translation(Math.sin(0.9 * this.playTime - 0.5 + this.snowDisplacementRandoms[3]), (this.playTime % 2.3) * -1 + 1.1, -1),
+      Mat4.translation(Math.cos(this.playTime + this.snowDisplacementRandoms[4]), (this.playTime % 2) * -1 + 1, -1),
+      Mat4.translation(Math.sin(this.playTime + 0.5 + this.snowDisplacementRandoms[5]), (this.playTime % 2) * -1 + 0.9, -1),
+      Mat4.translation(Math.cos(this.playTime + 1 + this.snowDisplacementRandoms[6]), (this.playTime % 2.1) * -1 + 1.05, -1),
+      Mat4.translation(Math.sin(this.playTime + 1.5 + this.snowDisplacementRandoms[7]), (this.playTime % 2.1) * -1 + 1.06, -1),
+      Mat4.translation(Math.cos(this.playTime + 2 + this.snowDisplacementRandoms[8]), ((this.playTime + 1) % 2.2) * -1 + 1.1, -1),
+      Mat4.translation(Math.sin(this.playTime + 2.5 + this.snowDisplacementRandoms[9]), ((this.playTime + 1) % 2.2) * -1 + 1.5, -1),
+    ];
 
     this.shapes.text.draw(
       context,
@@ -592,6 +626,17 @@ export class Game extends Scene {
       ),
       this.text_image
     );
+
+    for (let i = 0; i < snowDisplacements.length; i++) {
+      this.shapes.snowflake.draw(
+        context,
+        program_state,
+        program_state.camera_transform.times(
+          snowDisplacements[i].times(Mat4.scale(snowScale, snowScale, snowScale))
+        ),
+        this.materials.snow
+      );
+    }
 
     program_state.view_mat = program_state.camera_inverse;
     this.render_scene(context, program_state, true);
