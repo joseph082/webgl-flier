@@ -249,6 +249,8 @@ export class Game extends Scene {
 
   reset() {
     console.log("Reset game");
+    this.playTime = 0;
+    this.collidedRings = 0;
     this.playerPosition = vec3(0, INITIAL_HEIGHT, 5);
     this.playerVelocity = vec3(0, -0.5, 1);
     this.speed = INITIAL_SPEED;
@@ -437,6 +439,8 @@ export class Game extends Scene {
         .times(this.lateral_value);
       lateralVec.scale_by(dt * LATERAL_SPEED);
       this.playerPosition.add_by(lateralVec);
+
+      this.playTime += dt;
     }
 
     let rotAngle = vec3(0, 0, Math.sign(this.playerVelocity[2])).cross(
@@ -549,38 +553,21 @@ export class Game extends Scene {
       2000
     );
 
-    const t = program_state.animation_time / 1000;
-    const funny_orbit = Mat4.rotation(Math.PI / 4 * t, Math.cos(t), Math.sin(t), .7 * Math.cos(t));
-
-
-    this.shapes.cube.draw(context, program_state, funny_orbit, this.grey);
-
-    const score = Math.floor(t);
-    const time = t;
+    const time = Math.floor(this.playTime);
+    const score = time + this.collidedRings * 2;
     const scoreString = `Score:${score.toString(10).padStart(4, '0')}`;
-    const outputString = [`${scoreString}         Time: ${Math.floor(time)}`];
+    const outputString = `${scoreString}         Time: ${Math.floor(time)}`;
 
-    // Sample the "strings" array and draw them onto a cube.
+    this.shapes.text.set_string(outputString, context.context);
+
+    const textScale = 0.03;
+    const textDisplacement = Mat4.translation(-0.6, 0.35, -1); // displace slightly in front of camera
+    this.shapes.text.draw(context, program_state,
+      program_state.camera_transform.times(
+        textDisplacement.times(
+          Mat4.scale(textScale, textScale, textScale))), this.text_image);
 
 
-    const multi_line_string = outputString[0].split('\n');
-    // Draw a Text_String for every line in our string, up to 30 lines:
-    for (const line of outputString) {             // Assign the string to Text_String, and then draw it.
-      this.shapes.text.set_string(line, context.context);
-      // this.shapes.text.draw(context, program_state, funny_orbit.times(cube_side)
-      //   .times(Mat4.scale(.03, .03, .03)), this.text_image);
-
-      // this.shapes.text.draw(context, program_state, Mat4.translation(-0.99, 0.08, 0).times(
-      //   Mat4.scale(0.5, (0.5 * gl.canvas.width) / gl.canvas.height, 1)
-      // ), this.text_image);
-
-      const textScale = 0.03;
-      this.shapes.text.draw(context, program_state,
-        program_state.camera_transform.times(Mat4.translation(-60 / 100, 35 / 100, -1).times(Mat4.scale(textScale, textScale, textScale))), this.text_image);
-
-      // Move our basis down a line.
-
-    }
 
 
     program_state.view_mat = program_state.camera_inverse;
