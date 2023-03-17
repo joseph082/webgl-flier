@@ -95,7 +95,7 @@ const shapes = {
   trapezoidalPrism:
     new defs.Capped_Cylinder(10, 10, Mat4.scale(3, 1, 1)),
   sphere: new defs.Subdivision_Sphere(8),
-  triangle: new defs.Cone_Tip(10, 10),
+  cone: new defs.Cone_Tip(10, 10),
   torus: new defs.Torus(16, 16),
   cube: new defs.Cube(),
   cone: new defs.Closed_Cone(10, 10),
@@ -111,6 +111,16 @@ for (let i = 0; i < shapes.cone.arrays.texture_coord.length; i++) {
   shapes.cone.arrays.texture_coord[i][0] /= 10;
   shapes.cone.arrays.texture_coord[i][1] /= 10;
 }
+
+// for (let i = 0; i < shapes.cone.arrays.texture_coord.length; i++) {
+//   shapes.cone.arrays.texture_coord[i][0] /= 10;
+//   shapes.cone.arrays.texture_coord[i][1] /= 10;
+// }
+
+// for (let i = 0; i < shapes.sphere.arrays.texture_coord.length; i++) {
+//   shapes.sphere.arrays.texture_coord[i][0] /= 10;
+//   shapes.sphere.arrays.texture_coord[i][1] /= 10;
+// }
 
 // for (let i = 0; i < shapes.trapezoidalPrism.arrays.texture_coord.length; i++) {
 //   shapes.trapezoidalPrism.arrays.texture_coord[i][0] /= 8;
@@ -154,6 +164,15 @@ const leavesTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
   smoothness: 64,
   light_depth_texture: null
 });
+const playerTexutre = new Material(new Shadow_Textured_Phong_Shader(1), {
+  ambient: 0.8,
+  diffusivity: 0.4,
+  specularity: 0.7,
+  // color_texture: new Texture("assets/player.png"),
+  color: hex_color("#DD571C"),
+  smoothness: 64,
+  light_depth_texture: null
+});
 
 const groundRotation = Mat4.rotation((Math.PI * 2) / 3, 1, 0, 0);
 const invertedGroundRotation = Mat4.inverse(groundRotation);
@@ -193,31 +212,12 @@ export class Player extends GameObject {
         .times(this.getBaseTransform())
         .times(Mat4.scale(1.5, 1.5, 1.5)),
       material_override ??
-      phong_material.override({
-        ambient: 0.9,
-        diffusivity: 0.0,
-        color: this.wingsuitOrange,
+      playerTexutre.override({
         light_depth_texture,
       })
     );
     
-    shapes.triangle.draw(
-      context,
-      program_state,
-      model_transform
-        .times(this.getBaseTransform())
-        .times(Mat4.rotation(Math.PI / 2, 0, 1, 0))
-        .times(Mat4.scale(2, 1, 5)),
-      material_override ??
-      phong_material.override({
-        ambient: 0.9,
-        diffusivity: 0.0,
-        color: this.wingsuitOrange,
-        light_depth_texture,
-      })
-    );
-    
-    shapes.triangle.draw(
+    shapes.cone.draw(
       context,
       program_state,
       model_transform
@@ -225,15 +225,25 @@ export class Player extends GameObject {
         .times(Mat4.rotation(-Math.PI / 2, 0, 1, 0))
         .times(Mat4.scale(2, 1, 5)),
       material_override ??
-      phong_material.override({
-        ambient: 0.9,
-        diffusivity: 0.0,
-        color: this.wingsuitOrange,
+      playerTexutre.override({
         light_depth_texture,
       })
     );
-    // // bottom triangle
-    // shapes.triangle.draw(
+    
+    shapes.cone.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.getBaseTransform())
+        .times(Mat4.rotation(Math.PI / 2, 0, 1, 0))
+        .times(Mat4.scale(2, 1, 5)),
+      material_override ??
+      playerTexutre.override({
+        light_depth_texture,
+      })
+    );
+    // // bottom cone
+    // shapes.cone.draw(
     //   context,
     //   program_state,
     //   model_transform
@@ -242,10 +252,7 @@ export class Player extends GameObject {
     //     .times(Mat4.rotation(0, 0, 1, 0))
     //     .times(Mat4.scale(5, 2, 6)),
     //   material_override ??
-    //   phong_material.override({
-    //     ambient: 0.9,
-    //     diffusivity: 0.0,
-    //     color: this.wingsuitOrange,
+    //   playerTexutre.override({
     //     light_depth_texture,
     //   })
     // );

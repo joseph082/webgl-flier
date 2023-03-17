@@ -1540,7 +1540,6 @@ const Webgl_Manager = (tiny.Webgl_Manager = class Webgl_Manager {
     const gl = this.context;
 
     this.set_size(dimensions);
-    console.log(background_color);
     gl.clearColor.apply(gl, background_color); // Tell the GPU which color to clear the canvas with each frame.
     gl.getExtension("OES_element_index_uint"); // Load an extension to allow shapes with more than 65535 vertices.
     gl.enable(gl.DEPTH_TEST); // Enable Z-Buffering test.
@@ -1569,7 +1568,7 @@ const Webgl_Manager = (tiny.Webgl_Manager = class Webgl_Manager {
       w.oRequestAnimationFrame ||
       w.msRequestAnimationFrame ||
       function (callback, element) {
-        w.setTimeout(callback, 1000 / 60);
+        w.setTimeout(callback, 1000 / 30);
       })(window);
   }
 

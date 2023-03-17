@@ -33,13 +33,13 @@ const MAX_VERTICAL_ANGLE = -0.2; // Player will always be angled somewhat downwa
 // const MIN_SPEED = 100;
 // const LATERAL_SPEED = 20;
 const INITIAL_HEIGHT = 80;
-const INITIAL_SPEED = 45;
-const MAX_SPEED = 90;
-const MIN_SPEED = 40;
+const INITIAL_SPEED = 80;
+const MAX_SPEED = 140;
+const MIN_SPEED = 60;
 const LATERAL_SPEED = 10;
 const DIVE_ACCELERATION = 5;
 const FLATTEN_DECELERATION = 1;
-const CAM_DISTANCE = 20; // How far the camera is from the player
+const CAM_DISTANCE = 0.1; // How far the camera is from the player
 
 export class Game extends Scene {
   constructor() {
@@ -99,7 +99,7 @@ export class Game extends Scene {
   }
 
   flatten_up() {
-    console.log(this.playerVelocity)
+    // console.log(this.playerVelocity)
     if (this.speed > MIN_SPEED)
       this.speed-=FLATTEN_DECELERATION;
     if (this.playerVelocity[1] < MAX_VERTICAL_ANGLE)
@@ -127,7 +127,7 @@ export class Game extends Scene {
   }
 
   dive_down() {
-    console.log(this.playerVelocity)
+    // console.log(this.playerVelocity)
 
     if (this.speed < MAX_SPEED)
       this.speed+=DIVE_ACCELERATION;
@@ -205,7 +205,7 @@ export class Game extends Scene {
     // Generate rings.
     for (let i = 0; i < 10; i++) {
       const x = Math.random() * 400 - 200;
-      const z = 200 + 180 * i;
+      const z = 200 + 220 * i;
       const y = -z * Math.sin(Math.PI / 6) + 50 - 20 * Math.random() - 10 * i;
       this.rings.push(new Ring(
         Mat4.translation(x, y, z).times(Mat4.scale(15, 15, 15))
@@ -303,9 +303,9 @@ export class Game extends Scene {
     program_state.draw_shadow = shadow_pass;
 
     for (let object of this.objects) {
-      // if (object === this.ground && !shadow_pass) {
-      // continue;
-      // }
+      if (object === this.player && shadow_pass && this.followCamera) {
+        continue;
+      }
       object.draw(
           context,
           program_state,
