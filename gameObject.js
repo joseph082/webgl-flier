@@ -482,7 +482,7 @@ export class Ground extends GameObject {
     // Generate mountains in the center
     for (let i = 0; i < 10; i++) {
       const x = Math.random() * 500 - 250;
-      const y = Math.random() * 2000 + 100;
+      const y = Math.random() * 2000 + 500;
       const z = -5;
       this.children.push(new Mountain(Mat4.translation(x, y, z)));
     }
