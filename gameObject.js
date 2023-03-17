@@ -98,6 +98,9 @@ const MOUNTAIN_HEIGHT = 250;
 const MOUNTAIN_WIDTH = 150;
 
 const phong_material = new Material(new Shadow_Textured_Phong_Shader(1));
+const tireMaterial = new Material(new Shadow_Textured_Phong_Shader(1), {
+  color: hex_color("#000000"),
+});
 const rockTexture = new Material(new Shadow_Textured_Phong_Shader(1), {
   // color: hex_color("#7F8386"), // <-- changed base color to black
   ambient: 0.6, // <-- changed ambient to 1
@@ -609,15 +612,113 @@ export class FinishGround extends GameObject {
   }
 
   draw(context, program_state, model_transform, material_override, _) {
+    const GROUND_Y = -1500;
     shapes.square.draw(
       context,
       program_state,
       model_transform
         .times(this.baseTransform)
-        .times(Mat4.translation(0, -1500, 2500))
+        .times(Mat4.translation(0, GROUND_Y, 2500))
         .times(Mat4.scale(3000, 3000, 3000))
         .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)),
       material_override ?? snowTexture.override({ color: hex_color("#808080") })
+    );
+
+    const CABIN_Z = 2750;
+    // log cabin
+    shapes.cube.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.baseTransform)
+        .times(Mat4.translation(0, GROUND_Y, CABIN_Z))
+        .times(Mat4.scale(30, -60, 30)),
+      material_override ?? barkTexture.override({})
+    );
+
+    //truck body
+    shapes.cube.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.baseTransform)
+        .times(Mat4.translation(50, GROUND_Y + 10, CABIN_Z))
+        .times(Mat4.scale(15, -5, 5)),
+      material_override ?? phong_material.override({ color: hex_color('#0000ff') })
+    );
+
+    shapes.cube.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.baseTransform)
+        .times(Mat4.translation(40, GROUND_Y + 15, CABIN_Z))
+        .times(Mat4.scale(5, -5, 5)),
+      material_override ?? phong_material.override({ color: hex_color('#0000ff') })
+    );
+
+    // two wheels
+    shapes.sphere.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.baseTransform)
+        .times(Mat4.translation(58, GROUND_Y + 5, CABIN_Z - 5))
+        .times(Mat4.scale(3, -3, 3)),
+      material_override ?? tireMaterial
+    );
+
+    shapes.sphere.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.baseTransform)
+        .times(Mat4.translation(40, GROUND_Y + 5, CABIN_Z - 5))
+        .times(Mat4.scale(3, -3, 3)),
+      material_override ?? tireMaterial
+    );
+
+    //red car
+    const CAR_Z = CABIN_Z - 27;
+    shapes.cube.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.baseTransform)
+        .times(Mat4.translation(50, GROUND_Y + 10, CAR_Z))
+        .times(Mat4.scale(15, -5, 5)),
+      material_override ?? phong_material.override({ color: hex_color('#dd0000') })
+    );
+
+    shapes.cube.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.baseTransform)
+        .times(Mat4.translation(48, GROUND_Y + 15, CAR_Z))
+        .times(Mat4.scale(8, -5, 5)),
+      material_override ?? phong_material.override({ color: hex_color('#dd0000') })
+    );
+
+
+    shapes.sphere.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.baseTransform)
+        .times(Mat4.translation(58, GROUND_Y + 5, CAR_Z - 5))
+        .times(Mat4.scale(3, -3, 3)),
+      material_override ?? tireMaterial
+    );
+
+    shapes.sphere.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.baseTransform)
+        .times(Mat4.translation(40, GROUND_Y + 5, CAR_Z - 5))
+        .times(Mat4.scale(3, -3, 3)),
+      material_override ?? tireMaterial
     );
 
     // for (let tree of this.children) {
@@ -702,12 +803,12 @@ export class FinishRing extends GameObject {
         .times(Mat4.translation(0, -1200, 2500))
         .times(Mat4.scale(250, 250, 250)),
       material_override ??
-        phong_material.override({
-          ambient: 0.4,
-          diffusivity: 0.6,
-          color: hex_color("#FF0000"),
-          light_depth_texture,
-        })
+      phong_material.override({
+        ambient: 0.4,
+        diffusivity: 0.6,
+        color: hex_color("#FF0000"),
+        light_depth_texture,
+      })
     );
   }
 }
