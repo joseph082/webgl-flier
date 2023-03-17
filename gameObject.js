@@ -285,13 +285,13 @@ export class Ring extends GameObject {
     // console.log({ playerX, lastPlayerX, approxPlayerX });
     if (
       Math.sqrt((approxPlayerX - ringX) ** 2 + (approxPlayerY - ringY) ** 2) <
-      this.ringSize / 2 + 5
+      this.ringSize / 2 + 10
     ) {
-      console.log("collided with ring", {
-        dist: Math.sqrt(
-          (approxPlayerX - ringX) ** 2 + (approxPlayerY - ringY) ** 2
-        ),
-      });
+      // console.log("collided with ring", {
+      //   dist: Math.sqrt(
+      //     (approxPlayerX - ringX) ** 2 + (approxPlayerY - ringY) ** 2
+      //   ),
+      // });
       this.collided = true;
       return true;
     }
@@ -393,34 +393,37 @@ export class Tree extends GameObject {
     // height = 50, r = 5
     const treeCoords = groundRotation
       .times(this.baseTransform)
-      .times(invertedGroundRotation);
+      .times(invertedGroundRotation)
+      .times(Mat4.rotation(-Math.PI / 2, 1, 0, 0))
+      .times(Mat4.translation(0, 0, 15));
     const treeX = treeCoords[0][3],
       treeY = treeCoords[1][3],
       treeZ = treeCoords[2][3];
     // console.log({ treeX, treeY, treeZ });
     const collisionRadius = 9;
     if (
-      playerY > treeY + 50 ||
-      playerY <= treeY ||
+      playerY > treeY + 100 ||
+      playerY <= treeY - 100 ||
       Math.abs(playerX - treeX) > collisionRadius ||
       Math.abs(playerZ - treeZ) > collisionRadius
     ) {
       return false;
     }
     const dy = treeY + 50 - playerY;
-    const circleRadius = (9 / 50) * dy;
-    console.log({
-      dist: Math.sqrt((playerX - treeX) ** 2 + (playerZ - treeZ) ** 2),
-      circleRadius,
-      dL: circleRadius + 6,
-    });
+    const circleRadius = (18 / 50) * dy;
+    // console.log({
+    //   dist: Math.sqrt((playerX - treeX) ** 2 + (playerZ - treeZ) ** 2),
+    //   circleRadius,
+    //   dL: circleRadius + 6,
+    // });
     if (
       Math.sqrt((playerX - treeX) ** 2 + (playerZ - treeZ) ** 2) <
-      circleRadius + 6
+      circleRadius + 3
     ) {
-      console.log("collided with tree", {
-        dist: Math.sqrt((playerX - treeX) ** 2 + (playerZ - treeZ) ** 2),
-      });
+      // console.log("collided with tree", {
+      //   dist: Math.sqrt((playerX - treeX) ** 2 + (playerZ - treeZ) ** 2),
+      //   dy,
+      // });
       return true;
     }
     return false;
@@ -446,6 +449,17 @@ export class Tree extends GameObject {
         .times(Mat4.scale(2, 2, TREE_HEIGHT)),
       material_override ?? barkTexture.override({ light_depth_texture })
     );
+    shapes.cylinder.draw(
+      context,
+      program_state,
+      model_transform
+        .times(this.getBaseTransform())
+        .times(invertedGroundRotation)
+        .times(Mat4.scale(1, 10, 1)),
+      material_override ?? barkTexture.override({ light_depth_texture })
+    );
+
+    // shapes.cylinder;
 
     // position of this might be centered? so needs to scale more?
     //tree leaves
@@ -472,24 +486,23 @@ export class Mountain extends GameObject {
   }
 
   draw(
-      context,
-      program_state,
-      model_transform,
-      material_override,
-      light_depth_texture
+    context,
+    program_state,
+    model_transform,
+    material_override,
+    light_depth_texture
   ) {
-    return;
     const MOUNTAIN_HEIGHT = 400;
     const MOUNTAIN_WIDTH = 200;
     shapes.rounded_cone.draw(
-        context,
-        program_state,
-        model_transform
-            .times(this.getBaseTransform())
-            .times(invertedGroundRotation)
-            .times(Mat4.rotation(-Math.PI / 2, 1, 0, 0))
-            .times(Mat4.scale(MOUNTAIN_WIDTH, MOUNTAIN_WIDTH, MOUNTAIN_HEIGHT)),
-        material_override ?? snowTexture.override({ light_depth_texture })
+      context,
+      program_state,
+      model_transform
+        .times(this.getBaseTransform())
+        .times(invertedGroundRotation)
+        .times(Mat4.rotation(-Math.PI / 2, 1, 0, 0))
+        .times(Mat4.scale(MOUNTAIN_WIDTH, MOUNTAIN_WIDTH, MOUNTAIN_HEIGHT)),
+      material_override ?? snowTexture.override({ light_depth_texture })
     );
   }
 }
