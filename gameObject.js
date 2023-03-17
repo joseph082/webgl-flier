@@ -645,50 +645,6 @@ export class Ground extends GameObject {
 export class FinishGround extends GameObject {
   constructor(baseTransform) {
     super(baseTransform);
-
-    // Generate trees
-    for (let i = 0; i < 60; i++) {
-      const x = Math.random() * 2000 - 1000;
-      const y = Math.random() * 2000;
-      const z = -5;
-      this.children.push(
-        new Tree(Mat4.translation(x, y, z).times(Mat4.scale(2.5, 5, 2.5)))
-      );
-    }
-
-    // Generate rocks
-    for (let i = 0; i < 40; i++) {
-      const x = Math.random() * 2000 - 1000;
-      const y = Math.random() * 2000;
-      const z = -5;
-      this.children.push(
-        new Rock(Mat4.translation(x, y, z).times(Mat4.scale(2.5, 2.5, 2.5)))
-      );
-    }
-
-    // Generate mountains on the left
-    for (let i = 0; i < 35; i++) {
-      const x = -Math.random() * 400 - 350;
-      const y = Math.random() * 2000;
-      const z = -5;
-      this.children.push(new Mountain(Mat4.translation(x, y, z)));
-    }
-
-    // Generate mountains on the right
-    for (let i = 0; i < 35; i++) {
-      const x = Math.random() * 400 + 350;
-      const y = Math.random() * 2000;
-      const z = -5;
-      this.children.push(new Mountain(Mat4.translation(x, y, z)));
-    }
-
-    // Generate mountains in the center
-    for (let i = 0; i < 10; i++) {
-      const x = Math.random() * 500 - 250;
-      const y = Math.random() * 2000 + 500;
-      const z = -5;
-      this.children.push(new Mountain(Mat4.translation(x, y, z)));
-    }
   }
 
   draw(
@@ -701,11 +657,8 @@ export class FinishGround extends GameObject {
     shapes.square.draw(
       context,
       program_state,
-      model_transform
-        // .times(this.getBaseTransform())
-        .times(Mat4.scale(3000, 3000, 1000))
-        .times(Mat4.translation(0, -400, 0)),
-      material_override ?? snowTexture.override({ color: hex_color("#808080") })
+      model_transform.times(this.baseTransform).times(Mat4.translation(0, -1500, 2500)).times(Mat4.scale(3000, 3000, 3000)).times(Mat4.rotation(Math.PI/2, 1, 0, 0)),
+    material_override ?? snowTexture.override({ color: hex_color("#808080") })
     );
 
     // for (let tree of this.children) {
@@ -782,10 +735,7 @@ export class FinishRing extends GameObject {
     shapes.torus.draw(
       context,
       program_state,
-      model_transform
-        .times(this.baseTransform)
-        .times(Mat4.translation(0, -1100, 2500))
-        .times(Mat4.scale(250, 250, 250)),
+      model_transform.times(this.baseTransform).times(Mat4.translation(0, -1200, 2500)).times(Mat4.scale(250, 250, 250)),
       material_override ??
         phong_material.override({
           ambient: 0.4,
